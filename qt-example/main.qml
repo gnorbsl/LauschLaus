@@ -21,6 +21,8 @@ Window {
     property var albumList: []
     property string currentTrack: ""
     property string currentAlbum: ""
+    property string currentAlbumUri: ""
+    property string currentAlbumImage: ""
     property bool isPlaying: false
     
     // WebSocket for Mopidy connection
@@ -58,7 +60,22 @@ Window {
             } else if (msg.id === "getCurrentTrack") {
                 if (msg.result && msg.result.name) {
                     currentTrack = msg.result.name;
-                    currentAlbum = msg.result.album ? msg.result.album.name : "";
+                    if (msg.result.album) {
+                        currentAlbum = msg.result.album.name;
+                        currentAlbumUri = msg.result.album.uri;
+                        getAlbumImage(currentAlbumUri);
+                    }
+                }
+            } else if (msg.id === "getImages") {
+                if (msg.result && msg.result[currentAlbumUri] && msg.result[currentAlbumUri].length > 0) {
+                    var images = msg.result[currentAlbumUri];
+                    // Sort by width to get the largest image
+                    images.sort(function(a, b) {
+                        return (b.width || 0) - (a.width || 0);
+                    });
+                    if (images[0].uri) {
+                        currentAlbumImage = "http://localhost:6680" + images[0].uri;
+                    }
                 }
             }
         }
@@ -464,11 +481,21 @@ Window {
                         color: Qt.rgba(1, 1, 1, 0.1)
                         radius: 12
 
+                        Image {
+                            id: albumArtImage
+                            anchors.fill: parent
+                            source: currentAlbumImage
+                            fillMode: Image.PreserveAspectFit
+                            visible: status === Image.Ready
+                            smooth: true
+                        }
+
                         Text {
                             anchors.centerIn: parent
                             text: getEmoji(currentAlbum)
                             font.pixelSize: Math.min(parent.width, parent.height) * 0.6
                             font.family: "Noto Color Emoji"
+                            visible: albumArtImage.status !== Image.Ready
                         }
                     }
                 }
@@ -569,5 +596,11 @@ Window {
         running: currentView === "player"
         repeat: true
         onTriggered: getCurrentTrack()
+    }
+
+    function getAlbumImage(albumUri) {
+        if (albumUri) {
+            sendRequest("core.library.getImages", { uris: [albumUri] }, "getImages")
+        }
     }
 } 
