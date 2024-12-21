@@ -1,22 +1,27 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.1)
 project(KidsPlayer VERSION 1.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+# Find Qt5 packages
+find_package(Qt5 COMPONENTS Core Quick REQUIRED)
 
-qt_add_executable(KidsPlayer
+# Create resource file
+qt5_add_resources(QT_RESOURCES
+    resources.qrc
+)
+
+# Add executable
+add_executable(KidsPlayer
     main.cpp
+    ${QT_RESOURCES}
 )
 
-qt_add_qml_module(KidsPlayer
-    URI KidsPlayer
-    VERSION 1.0
-    QML_FILES
-        main.qml
-)
-
-target_link_libraries(KidsPlayer PRIVATE
-    Qt6::Quick
+# Link Qt5 libraries
+target_link_libraries(KidsPlayer
+    Qt5::Core
+    Qt5::Quick
 ) 
