@@ -204,7 +204,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=$HOME/LauschLaus/frontend
-ExecStart=/usr/bin/npm run preview -- --host $LOCAL_IP
+ExecStart=/usr/bin/npm run preview
 Restart=on-failure
 User=$USER
 Environment=PORT=3000
@@ -298,7 +298,7 @@ else
 fi
 cd ~/LauschLaus
 echo "✨ Installation complete!"
-echo "🌐 You can access LauschLaus at http://$LOCAL_IP:3000"
+echo "🌐 You can access LauschLaus at http://localhost:3000"
 echo "⚙️ Mopidy is running on port 6680"
 echo "📂 File Browser is available at http://$LOCAL_IP:8080"
 echo "💡 Your music directory is located at ~/Music/LauschLaus"
