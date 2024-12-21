@@ -131,6 +131,7 @@ curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | sud
 
 # Configure File Browser
 echo "🔧 Configuring File Browser..."
+sudo filebrowser config init
 sudo filebrowser config set --branding.name "LauschLaus"
 
 # Create systemd service for File Browser
