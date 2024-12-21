@@ -27,94 +27,128 @@ Window {
             color: "white"
             font.pixelSize: 12
             z: 100
+            text: "Screen size: " + parent.width + "x" + parent.height
         }
     }
 
-    Grid {
+    // Main content area
+    Rectangle {
         anchors.fill: parent
         anchors.margins: 12
-        columns: Math.floor(parent.width / 150)
-        spacing: 4
+        color: "transparent"
 
-        Repeater {
-            model: ListModel {
-                ListElement { name: "Aladdin" }
-                ListElement { name: "Bob der Baumeister" }
-                ListElement { name: "Das Dschungelbuch" }
-                ListElement { name: "Die Playmos" }
-                ListElement { name: "PAW Patrol" }
-                ListElement { name: "Ratatouille" }
-                ListElement { name: "Tarzan" }
+        Column {
+            anchors.fill: parent
+            spacing: 8
+
+            // First row
+            Row {
+                spacing: 8
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                Repeater {
+                    model: 4  // First 4 items
+                    delegate: ArtistCard {
+                        artistName: getArtistName(index)
+                    }
+                }
             }
 
-            delegate: Rectangle {
-                id: card
-                width: 140
-                height: 180
-                radius: 8
-                color: Qt.rgba(1, 1, 1, 0.2)
-                
-                // Scale animation on press
-                scale: mouseArea.pressed ? 0.95 : mouseArea.containsMouse ? 1.02 : 1.0
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 150
-                        easing.type: Easing.OutQuad
+            // Second row
+            Row {
+                spacing: 8
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                Repeater {
+                    model: 3  // Last 3 items
+                    delegate: ArtistCard {
+                        artistName: getArtistName(index + 4)
                     }
-                }
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 4
-
-                    Rectangle {
-                        Layout.alignment: Qt.AlignCenter
-                        width: 135
-                        height: 135
-                        color: Qt.rgba(1, 1, 1, 0.1)
-                        radius: 6
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: getEmoji(model.name)
-                            font.pixelSize: 72
-                            font.family: "Noto Color Emoji"
-                        }
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignCenter
-                        Layout.fillWidth: true
-                        text: model.name
-                        color: "white"
-                        font.pixelSize: 14
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        elide: Text.ElideRight
-                    }
-                }
-
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        console.log("Clicked:", model.name)
-                        debugText.text = "Clicked: " + model.name
-                    }
-                    onContainsMouseChanged: {
-                        if (containsMouse) {
-                            debugText.text = "Hovering: " + model.name
-                        }
-                    }
-                }
-
-                Component.onCompleted: {
-                    console.log("Created card for:", model.name)
                 }
             }
         }
+    }
+
+    // Artist Card Component
+    component ArtistCard: Rectangle {
+        property string artistName
+        id: card
+        width: 140
+        height: 180
+        radius: 8
+        color: Qt.rgba(1, 1, 1, 0.2)
+        
+        scale: mouseArea.pressed ? 0.95 : mouseArea.containsMouse ? 1.02 : 1.0
+        Behavior on scale {
+            NumberAnimation {
+                duration: 150
+                easing.type: Easing.OutQuad
+            }
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 8
+            spacing: 4
+
+            Rectangle {
+                Layout.alignment: Qt.AlignCenter
+                width: 135
+                height: 135
+                color: Qt.rgba(1, 1, 1, 0.1)
+                radius: 6
+
+                Text {
+                    anchors.centerIn: parent
+                    text: getEmoji(artistName)
+                    font.pixelSize: 72
+                    font.family: "Noto Color Emoji"
+                }
+            }
+
+            Text {
+                Layout.alignment: Qt.AlignCenter
+                Layout.fillWidth: true
+                text: artistName
+                color: "white"
+                font.pixelSize: 14
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+            }
+        }
+
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: {
+                console.log("Clicked:", artistName)
+                debugText.text = "Clicked: " + artistName
+            }
+            onContainsMouseChanged: {
+                if (containsMouse) {
+                    debugText.text = "Hovering: " + artistName
+                }
+            }
+        }
+
+        Component.onCompleted: {
+            console.log("Created card for:", artistName)
+        }
+    }
+
+    function getArtistName(index) {
+        var artists = [
+            "Aladdin",
+            "Bob der Baumeister",
+            "Das Dschungelbuch",
+            "Die Playmos",
+            "PAW Patrol",
+            "Ratatouille",
+            "Tarzan"
+        ];
+        return artists[index];
     }
 
     function getEmoji(name) {
