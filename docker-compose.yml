@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  lausch-laus:
+    build: .
+    ports:
+      - "3000:3000"  # Frontend
+      - "6680:6680"  # Mopidy
+      - "8080:8080"  # File Browser
+    volumes:
+      - ./Music:/home/pi/Music  # Mount local Music directory
+    environment:
+      - DISPLAY=:0  # For audio output (though it won't actually play on Mac)
+    privileged: true  # Needed for systemd
+    command: /bin/bash -c "sleep infinity"  # Keep container running for testing
+
+ 

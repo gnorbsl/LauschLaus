@@ -1,0 +1,13 @@
+[http]
+enabled = true
+hostname = 127.0.0.1
+port = 6680
+allowed_origins = localhost:3000
+
+[audio]
+output = autoaudiosink
+
+[local]
+enabled = true
+media_dir = #change to folder where music is stored
+
