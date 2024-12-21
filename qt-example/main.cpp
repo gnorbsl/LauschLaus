@@ -8,8 +8,12 @@ int main(int argc, char *argv[])
     qputenv("QT_DEBUG_PLUGINS", "1");
     qputenv("QT_LOGGING_RULES", "qt.qpa.*=true");
     
-    // Use minimal platform for testing
-    qputenv("QT_QPA_PLATFORM", "minimal");
+    // Use Linux Framebuffer
+    qputenv("QT_QPA_PLATFORM", "linuxfb");
+    qputenv("QT_QPA_FB_DEV", "/dev/fb0");
+    qputenv("QT_QPA_FB_TTY", "/dev/tty1");
+    qputenv("QT_QPA_FB_HIDECURSOR", "1");
+    qputenv("QT_QPA_FB_TSLIB", "1");
     
     QGuiApplication app(argc, argv);
     
