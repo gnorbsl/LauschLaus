@@ -44,7 +44,8 @@ sudo rm -f /etc/apt/keyrings/nodesource.gpg
 
 # Remove LauschLaus directory and files
 echo "🗑️  Removing LauschLaus files..."
-rm -rf ~/LauschLaus
+cd ~
+rm -rf LauschLaus
 
 # Ask about removing music directory
 read -p "❓ Do you want to remove the music directory (~/Music/LauschLaus)? [y/N] " -n 1 -r
