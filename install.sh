@@ -64,11 +64,11 @@ sudo apt-get install -y mopidy
 
 # Install Mopidy extensions
 echo "📦 Installing Mopidy extensions..."
-sudo apt-get install -y python3-full python3-venv
+sudo apt-get install -y python3-full python3-venv python3-gi gir1.2-gstreamer-1.0
 
 # Create virtual environment for Mopidy extensions
 echo "🐍 Creating Python virtual environment for Mopidy..."
-python3 -m venv "$HOME/.local/share/mopidy/venv"
+python3 -m venv "$HOME/.local/share/mopidy/venv" --system-site-packages
 source "$HOME/.local/share/mopidy/venv/bin/activate"
 pip install Mopidy-MPD Mopidy-Local
 deactivate
@@ -83,6 +83,7 @@ After=network.target
 [Service]
 User=mopidy
 Environment=PATH=$HOME/.local/share/mopidy/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/usr/lib/python3/dist-packages
 ExecStart=$HOME/.local/share/mopidy/venv/bin/mopidy
 Restart=on-failure
 
@@ -177,6 +178,7 @@ After=network.target
 [Service]
 User=mopidy
 Environment=PATH=$HOME/.local/share/mopidy/venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=PYTHONPATH=/usr/lib/python3/dist-packages
 ExecStart=$HOME/.local/share/mopidy/venv/bin/mopidy
 Restart=on-failure
 
