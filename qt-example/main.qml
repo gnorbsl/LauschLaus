@@ -12,6 +12,21 @@ Window {
     title: "KidsPlayer"
     color: "#4158D0"
 
+    // Performance optimizations
+    Item {
+        id: perfOptimizations
+        Component.onCompleted: {
+            // Force immediate compilation of all shaders
+            for (var i = 0; i < root.children.length; ++i) {
+                var child = root.children[i];
+                if (child.visible) {
+                    child.visible = false;
+                    child.visible = true;
+                }
+            }
+        }
+    }
+
     // View state management
     property string currentView: "artists"
     property string selectedArtist: ""
@@ -96,8 +111,8 @@ Window {
                 scale: artistMouseArea.pressed ? 0.95 : 1.0
                 Behavior on scale {
                     NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutBounce
+                        duration: 150
+                        easing.type: Easing.OutQuad
                     }
                 }
 
@@ -106,10 +121,11 @@ Window {
                 layer.effect: DropShadow {
                     transparentBorder: true
                     color: "#80FFFFFF"
-                    radius: artistMouseArea.containsMouse ? 20 : 0
-                    samples: 20
+                    radius: artistMouseArea.containsMouse ? 10 : 0
+                    samples: 10
+                    cached: true
                     Behavior on radius {
-                        NumberAnimation { duration: 200 }
+                        NumberAnimation { duration: 150 }
                     }
                 }
 
@@ -232,8 +248,8 @@ Window {
                 scale: albumMouseArea.pressed ? 0.95 : 1.0
                 Behavior on scale {
                     NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutBounce
+                        duration: 150
+                        easing.type: Easing.OutQuad
                     }
                 }
 
@@ -241,10 +257,11 @@ Window {
                 layer.effect: DropShadow {
                     transparentBorder: true
                     color: "#80FFFFFF"
-                    radius: albumMouseArea.containsMouse ? 20 : 0
-                    samples: 20
+                    radius: albumMouseArea.containsMouse ? 10 : 0
+                    samples: 10
+                    cached: true
                     Behavior on radius {
-                        NumberAnimation { duration: 200 }
+                        NumberAnimation { duration: 150 }
                     }
                 }
 

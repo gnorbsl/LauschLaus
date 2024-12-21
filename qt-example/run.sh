@@ -12,6 +12,8 @@ sudo killall X matchbox-window-manager KidsPlayer 2>/dev/null
 
 # Clean up any existing X locks
 sudo rm -f /tmp/.X0-lock
+sudo rm -rf /tmp/.X11-unix
+sudo rm -rf /tmp/qml-cache
 
 # Set up environment
 export DISPLAY=:0
@@ -30,6 +32,15 @@ export QT_DEBUG_PLUGINS=1
 export QT_LOGGING_RULES="qt.qpa.*=true"
 export QT_QPA_PLATFORM=xcb
 export QT_QPA_GENERIC_PLUGINS=evdevtouch:/dev/input/event0
+export QT_QUICK_CONTROLS_STYLE=Basic
+export QML_DISABLE_DISK_CACHE=0
+export QSG_RENDER_LOOP=basic
+export QT_X11_NO_MITSHM=1
+export QML_FIXED_ANIMATION_STEP=16
+
+# Create cache directory
+mkdir -p /tmp/qml-cache
+chmod 700 /tmp/qml-cache
 
 # Copy X session configuration
 cp .xinitrc ~/
@@ -37,8 +48,8 @@ cp .xinitrc ~/
 # Build the application
 ./build.sh
 
-# Start X server with our configuration
-startx -- -nocursor
+# Start X server with optimized configuration
+startx -- -nocursor -dpi 96 -nolisten tcp
 
 # Show logs if something goes wrong
 echo "Checking logs..."
