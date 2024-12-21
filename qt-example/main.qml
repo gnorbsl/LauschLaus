@@ -445,7 +445,7 @@ Window {
 
     function playAlbum(albumUri) {
         sendRequest("core.tracklist.clear", {}, "clear")
-        sendRequest("core.tracklist.add", { uri: albumUri }, "add")
+        sendRequest("core.tracklist.add", { uris: [albumUri] }, "add")
         sendRequest("core.playback.play", {}, "play")
         getCurrentTrack()
     }
