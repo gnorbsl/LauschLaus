@@ -7,14 +7,19 @@ const CardContainer = styled.li`
   border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.02);
+  @media (hover: hover) {
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.02);
+    }
   }
   
   &:active {
     transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.3);
   }
 `;
 
@@ -75,8 +80,22 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, name
 };
 
 export const Card: React.FC<CardProps> = ({ name, imageUrl, onClick }) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent default to avoid any unwanted behaviors
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    onClick();
+  };
+
   return (
-    <CardContainer onClick={onClick}>
+    <CardContainer 
+      onClick={onClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <CardContent>
         <CoverArt 
           src={imageUrl || `https://placehold.co/100x100/rgba(255,255,255,0.1)/white?text=${getEmoji(name)}`}

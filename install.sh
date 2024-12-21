@@ -123,7 +123,7 @@ cd ..
 # Configure Mopidy
 echo "🔧 Configuring Mopidy..."
 sudo mkdir -p /etc/mopidy
-sudo tee /var/lib/mopidy/.config/mopidy/mopidy.conf > /dev/null << EOL
+sudo tee $HOME/.config/mopidy/mopidy.conf > /dev/null << EOL
 [http]
 enabled = true
 hostname = 127.0.0.1
@@ -234,7 +234,7 @@ echo "📁 Watching directory: \$MUSIC_DIR"
 # Function to perform the scan
 do_scan() {
     echo "🔄 Triggering Mopidy local scan..."
-    sudo -u mopidy \$MOPIDY_VENV/bin/mopidy --config /var/lib/mopidy/.config/mopidy/mopidy.conf scan
+    \$MOPIDY_VENV/bin/mopidy local scan
     date +%s > "\$LAST_SCAN_FILE"
 }
 
@@ -275,7 +275,7 @@ After=mopidy.service
 [Service]
 ExecStart=/usr/local/bin/lausch-laus-monitor
 Restart=on-failure
-User=${USER}
+User=$USER
 
 [Install]
 WantedBy=multi-user.target
