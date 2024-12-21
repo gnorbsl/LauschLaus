@@ -123,7 +123,7 @@ cd ..
 # Configure Mopidy
 echo "🔧 Configuring Mopidy..."
 sudo mkdir -p /etc/mopidy
-sudo tee /etc/mopidy/mopidy.conf > /dev/null << EOL
+sudo tee /var/lib/mopidy/.config/mopidy/mopidy.conf > /dev/null << EOL
 [http]
 enabled = true
 hostname = 127.0.0.1
@@ -160,6 +160,10 @@ fi
 sudo filebrowser config set -d /var/lib/filebrowser/filebrowser.db --branding.name "LauschLaus"
 sudo chown $USER:$USER /var/lib/filebrowser/filebrowser.db
 
+# Add default admin user
+echo "👤 Creating default admin user for File Browser..."
+sudo filebrowser users add admin admin --perm.admin=true -d /var/lib/filebrowser/filebrowser.db
+
 # Create systemd service for File Browser
 echo "🔧 Creating systemd service for File Browser..."
 sudo tee /etc/systemd/system/filebrowser.service > /dev/null << EOL
@@ -168,7 +172,7 @@ Description=File Browser
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/filebrowser -d /var/lib/filebrowser/filebrowser.db -a 0.0.0.0 -r ~/Music/LauschLaus
+ExecStart=/usr/local/bin/filebrowser -d /var/lib/filebrowser/filebrowser.db -a $LOCAL_IP -r $(eval echo ~)/Music/LauschLaus
 Restart=on-failure
 User=$USER
 WorkingDirectory=/var/lib/filebrowser
@@ -230,7 +234,7 @@ echo "📁 Watching directory: \$MUSIC_DIR"
 # Function to perform the scan
 do_scan() {
     echo "🔄 Triggering Mopidy local scan..."
-    \$MOPIDY_VENV/bin/mopidy local scan
+    sudo -u mopidy \$MOPIDY_VENV/bin/mopidy --config /var/lib/mopidy/.config/mopidy/mopidy.conf scan
     date +%s > "\$LAST_SCAN_FILE"
 }
 
@@ -271,7 +275,7 @@ After=mopidy.service
 [Service]
 ExecStart=/usr/local/bin/lausch-laus-monitor
 Restart=on-failure
-User=\$USER
+User=${USER}
 
 [Install]
 WantedBy=multi-user.target
