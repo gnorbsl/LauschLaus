@@ -7,8 +7,8 @@ import QtGraphicalEffects 1.15
 Window {
     id: root
     visible: true
-    width: 800
-    height: 480
+    visibility: Window.FullScreen
+    flags: Qt.FramelessWindowHint
     title: "KidsPlayer"
     color: "#4158D0"
 
