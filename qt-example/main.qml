@@ -323,105 +323,152 @@ Window {
             Rectangle {
                 id: playerView
                 anchors.fill: parent
-                anchors.margins: 10
-                anchors.topMargin: 70  // Make room for title
                 visible: currentView === "player"
                 color: "transparent"
 
-                Column {
-                    anchors.fill: parent
-                    spacing: 30
-                    anchors.margins: 20
+                // Controls container (left side)
+                Rectangle {
+                    id: controlsContainer
+                    anchors {
+                        left: parent.left
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: parent.width * 0.35
+                    color: Qt.rgba(0, 0, 0, 0.3)
 
-                    // Album art / emoji
+                    Column {
+                        anchors.fill: parent
+                        spacing: 20
+                        anchors.margins: 20
+
+                        // Back button
+                        Rectangle {
+                            width: 70
+                            height: 70
+                            radius: 35
+                            color: Qt.rgba(1, 1, 1, 0.15)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⬅️"
+                                font.pixelSize: 32
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: currentView = "albums"
+                            }
+                        }
+
+                        // Title container
+                        Rectangle {
+                            width: parent.width
+                            height: 80
+                            color: Qt.rgba(1, 1, 1, 0.1)
+                            radius: 12
+
+                            Text {
+                                anchors.centerIn: parent
+                                width: parent.width - 40
+                                text: currentTrack || "No track playing"
+                                color: "white"
+                                font.pixelSize: 24
+                                font.bold: true
+                                horizontalAlignment: Text.AlignHCenter
+                                wrapMode: Text.WordWrap
+                                elide: Text.ElideRight
+                                maximumLineCount: 2
+                            }
+                        }
+
+                        // Playback controls
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 20
+
+                            // Previous track
+                            Rectangle {
+                                width: 70
+                                height: 70
+                                radius: 35
+                                color: Qt.rgba(1, 1, 1, 0.15)
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "⏮️"
+                                    font.pixelSize: 32
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: previousTrack()
+                                }
+                            }
+
+                            // Play/Pause
+                            Rectangle {
+                                width: 90
+                                height: 90
+                                radius: 45
+                                color: Qt.rgba(1, 1, 1, 0.15)
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: isPlaying ? "⏸️" : "▶️"
+                                    font.pixelSize: 40
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: togglePlayPause()
+                                }
+                            }
+
+                            // Next track
+                            Rectangle {
+                                width: 70
+                                height: 70
+                                radius: 35
+                                color: Qt.rgba(1, 1, 1, 0.15)
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "⏭️"
+                                    font.pixelSize: 32
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: nextTrack()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Album art container (right side)
+                Rectangle {
+                    anchors {
+                        left: controlsContainer.right
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    color: "transparent"
+
                     Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 240
-                        height: 240
+                        anchors.centerIn: parent
+                        width: Math.min(parent.width, parent.height) * 0.8
+                        height: width
                         color: Qt.rgba(1, 1, 1, 0.1)
                         radius: 12
 
                         Text {
                             anchors.centerIn: parent
                             text: getEmoji(currentAlbum)
-                            font.pixelSize: 160
+                            font.pixelSize: Math.min(parent.width, parent.height) * 0.6
                             font.family: "Noto Color Emoji"
-                        }
-                    }
-
-                    // Track name
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: parent.width - 40
-                        text: currentTrack || "No track playing"
-                        color: "white"
-                        font.pixelSize: 24
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                    }
-
-                    // Playback controls
-                    Row {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: 40
-                        height: 100
-
-                        // Previous track
-                        Rectangle {
-                            width: 80
-                            height: 80
-                            radius: 40
-                            color: Qt.rgba(1, 1, 1, 0.2)
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "⏮️"
-                                font.pixelSize: 32
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: previousTrack()
-                            }
-                        }
-
-                        // Play/Pause
-                        Rectangle {
-                            width: 100
-                            height: 100
-                            radius: 50
-                            color: Qt.rgba(1, 1, 1, 0.2)
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: isPlaying ? "⏸️" : "▶️"
-                                font.pixelSize: 40
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: togglePlayPause()
-                            }
-                        }
-
-                        // Next track
-                        Rectangle {
-                            width: 80
-                            height: 80
-                            radius: 40
-                            color: Qt.rgba(1, 1, 1, 0.2)
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "⏭️"
-                                font.pixelSize: 32
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: nextTrack()
-                            }
                         }
                     }
                 }
