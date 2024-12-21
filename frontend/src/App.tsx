@@ -216,7 +216,7 @@ const App: React.FC = () => {
     
     const initMopidy = () => {
       mopidy = new Mopidy({
-        webSocketUrl: '/mopidy/ws',
+        webSocketUrl: `${import.meta.env.VITE_MOPIDY_WS_URL}/mopidy/ws`,
       });
 
       mopidy.on('websocket:error', () => {

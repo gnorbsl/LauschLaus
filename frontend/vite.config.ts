@@ -8,23 +8,9 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port: parseInt(env.VITE_PORT || '3000'),
-      proxy: {
-        '/mopidy': {
-          target: env.VITE_MOPIDY_WS_URL,
-          changeOrigin: true,
-          ws: true,
-        }
-      }
     },
     preview: {
       port: parseInt(env.VITE_PORT || '3000'),
-      proxy: {
-        '/mopidy': {
-          target: env.VITE_MOPIDY_WS_URL,
-          changeOrigin: true,
-          ws: true,
-        }
-      }
     }
   };
 }); 

@@ -117,8 +117,6 @@ cd frontend
 cp .env.example .env
 npm install
 npm run build
-# copy example environment file
-cp .env.example .env
 
 cd ..
 
