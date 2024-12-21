@@ -3,6 +3,7 @@ import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.15
+import QtWebSockets 1.1
 
 Window {
     id: root
@@ -16,6 +17,48 @@ Window {
     // View state management
     property string currentView: "artists"
     property string selectedArtist: ""
+    property var artistList: []
+    property var albumList: []
+    
+    // WebSocket for Mopidy connection
+    WebSocket {
+        id: socket
+        url: "ws://localhost:6680/mopidy/ws"
+        active: true
+        
+        onTextMessageReceived: {
+            var msg = JSON.parse(message)
+            console.log("Received message:", JSON.stringify(msg))
+            
+            if (msg.event === "state_changed") {
+                // Handle state changes
+                return
+            }
+            
+            // Handle responses to our requests
+            if (msg.id === "getArtists") {
+                artistList = processArtists(msg.result)
+                artistsModel.clear()
+                for (var i = 0; i < artistList.length; i++) {
+                    artistsModel.append(artistList[i])
+                }
+            } else if (msg.id === "getAlbums") {
+                albumList = processAlbums(msg.result)
+                albumsModel.clear()
+                for (var j = 0; j < albumList.length; j++) {
+                    albumsModel.append(albumList[j])
+                }
+            }
+        }
+        
+        onStatusChanged: {
+            if (socket.status === WebSocket.Open) {
+                console.log("WebSocket connected")
+                // Get initial list of artists
+                getArtists()
+            }
+        }
+    }
     
     // Background gradient
     Rectangle {
@@ -96,13 +139,7 @@ Window {
                 clip: true
 
                 model: ListModel {
-                    ListElement { name: "Aladdin"; imageUrl: ""; type: "artist" }
-                    ListElement { name: "Bob der Baumeister"; imageUrl: ""; type: "artist" }
-                    ListElement { name: "Das Dschungelbuch"; imageUrl: ""; type: "artist" }
-                    ListElement { name: "Die Playmos"; imageUrl: ""; type: "artist" }
-                    ListElement { name: "PAW Patrol"; imageUrl: ""; type: "artist" }
-                    ListElement { name: "Ratatouille"; imageUrl: ""; type: "artist" }
-                    ListElement { name: "Tarzan"; imageUrl: ""; type: "artist" }
+                    id: artistsModel
                 }
 
                 delegate: Rectangle {
@@ -152,6 +189,7 @@ Window {
                             selectedArtist = model.name
                             parent.scale = 0.95
                             clickAnim.start()
+                            getAlbums(model.uri)
                         }
                     }
 
@@ -188,31 +226,8 @@ Window {
                 cellHeight: 190
                 clip: true
 
-                model: {
-                    if (selectedArtist === "Aladdin") return aladdinAlbums;
-                    if (selectedArtist === "Bob der Baumeister") return bobAlbums;
-                    return defaultAlbums;
-                }
-
-                // Example album collections
-                ListModel {
-                    id: aladdinAlbums
-                    ListElement { name: "Wunderlampe"; emoji: "💫" }
-                    ListElement { name: "Dschinni"; emoji: "🧞" }
-                    ListElement { name: "Wüstenabenteuer"; emoji: "🐪" }
-                }
-
-                ListModel {
-                    id: bobAlbums
-                    ListElement { name: "Baustelle"; emoji: "🏗️" }
-                    ListElement { name: "Bagger & Co"; emoji: "🚜" }
-                    ListElement { name: "Werkzeugkiste"; emoji: "🔨" }
-                }
-
-                ListModel {
-                    id: defaultAlbums
-                    ListElement { name: "Album 1"; emoji: "💿" }
-                    ListElement { name: "Album 2"; emoji: "💿" }
+                model: ListModel {
+                    id: albumsModel
                 }
 
                 delegate: Rectangle {
@@ -236,7 +251,7 @@ Window {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: model.emoji
+                                text: model.emoji || "💿"
                                 font.pixelSize: 72
                                 font.family: "Noto Color Emoji"
                             }
@@ -258,6 +273,7 @@ Window {
                         anchors.fill: parent
                         onClicked: {
                             console.log("Album clicked:", model.name)
+                            playAlbum(model.uri)
                             parent.scale = 0.95
                             albumClickAnim.start()
                         }
@@ -281,6 +297,57 @@ Window {
                 }
             }
         }
+    }
+
+    // Mopidy API functions
+    function sendRequest(method, params, id) {
+        var request = {
+            jsonrpc: "2.0",
+            id: id,
+            method: method,
+            params: params || {}
+        }
+        socket.sendTextMessage(JSON.stringify(request))
+    }
+
+    function getArtists() {
+        sendRequest("core.library.browse", { uri: "local:directory?type=artist" }, "getArtists")
+    }
+
+    function getAlbums(artistUri) {
+        sendRequest("core.library.browse", { uri: artistUri }, "getAlbums")
+    }
+
+    function playAlbum(albumUri) {
+        sendRequest("core.tracklist.clear", {}, "clear")
+        sendRequest("core.tracklist.add", { uri: albumUri }, "add")
+        sendRequest("core.playback.play", {}, "play")
+    }
+
+    function processArtists(result) {
+        var artists = []
+        for (var i = 0; i < result.length; i++) {
+            var artist = result[i]
+            artists.push({
+                name: artist.name,
+                uri: artist.uri,
+                type: "artist"
+            })
+        }
+        return artists
+    }
+
+    function processAlbums(result) {
+        var albums = []
+        for (var i = 0; i < result.length; i++) {
+            var album = result[i]
+            albums.push({
+                name: album.name,
+                uri: album.uri,
+                emoji: getEmoji(album.name)
+            })
+        }
+        return albums
     }
 
     function getEmoji(name) {
