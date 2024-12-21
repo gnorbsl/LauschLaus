@@ -6,9 +6,15 @@ int main(int argc, char *argv[])
     // Set EGLFS as the default platform
     qputenv("QT_QPA_PLATFORM", "eglfs");
     
-    // Disable cursor (we're using touch)
+    // Configure EGLFS for Raspberry Pi
+    qputenv("QT_QPA_EGLFS_INTEGRATION", "eglfs_brcm");
+    qputenv("QT_QPA_EGLFS_PHYSICAL_WIDTH", "800");
+    qputenv("QT_QPA_EGLFS_PHYSICAL_HEIGHT", "480");
     qputenv("QT_QPA_EGLFS_HIDECURSOR", "1");
-
+    
+    // Set the FB device
+    qputenv("QT_QPA_EGLFS_FB", "/dev/fb0");
+    
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
