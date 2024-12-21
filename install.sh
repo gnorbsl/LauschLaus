@@ -113,6 +113,8 @@ chmod +x uninstall.sh
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
 cd frontend
+# copy example environment file before installing and building
+cp .env.example .env
 npm install
 npm run build
 # copy example environment file
