@@ -350,6 +350,10 @@ const App: React.FC = () => {
       );
     }
 
+    if (!mopidyInstance) {
+      return <div>Loading...</div>;
+    }
+
     switch (currentLocation.type) {
       case 'root':
         return (

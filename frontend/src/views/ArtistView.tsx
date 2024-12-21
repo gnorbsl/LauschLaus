@@ -15,7 +15,7 @@ const Grid = styled.ul`
 `;
 
 interface ArtistViewProps {
-  mopidy: Mopidy;
+  mopidy: Mopidy ;
   onArtistClick: (uri: string, name: string) => void;
 }
 
@@ -25,12 +25,16 @@ export const ArtistView: React.FC<ArtistViewProps> = ({ mopidy, onArtistClick })
   const [blobUrls, setBlobUrls] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
-    const loadArtists = async () => {
+    const loadArtists = async () => { 
         console.log('Loading artists...');
         console.log(mopidy);
       try {
         setLoading(true);
-        const items = await mopidy.library.browse({ uri: "local:directory?type=artist" });
+        const items = await mopidy.library?.browse({ uri: "local:directory?type=artist" });
+        if (!items) {
+            console.error('No artists found');
+            return;
+        }
         console.log('Artists:', items);
         blobUrls.forEach(url => URL.revokeObjectURL(url));
         const newBlobUrls = new Map<string, string>();
