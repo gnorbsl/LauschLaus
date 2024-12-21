@@ -1,16 +1,9 @@
 #!/bin/bash
 
-# Make sure X is running
-if ! ps aux | grep -v grep | grep -q "X.*:0"; then
-    echo "Starting X server..."
-    startx &
-    sleep 5  # Wait for X to start
-fi
+# Enable debug output
+export QT_DEBUG_PLUGINS=1
+export QT_LOGGING_RULES="qt.qpa.*=true"
+export QT_QPA_PLATFORM=minimal
 
-# Set environment variables for X11
-export DISPLAY=:0
-export QT_QPA_PLATFORM=xcb
-export XAUTHORITY=$HOME/.Xauthority
-
-# Run the application
-./build/KidsPlayer 
+# Run the application with debug output
+./build/KidsPlayer 2>&1 | tee app.log 

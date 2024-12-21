@@ -1,22 +1,31 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QScreen>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
-    // Use X11 platform
-    qputenv("QT_QPA_PLATFORM", "xcb");
-    qputenv("DISPLAY", ":0");
+    // Enable debug output
+    qputenv("QT_DEBUG_PLUGINS", "1");
+    qputenv("QT_LOGGING_RULES", "qt.qpa.*=true");
+    
+    // Use minimal platform for testing
+    qputenv("QT_QPA_PLATFORM", "minimal");
     
     QGuiApplication app(argc, argv);
     
-    // Set up fullscreen on the primary screen
+    qDebug() << "Available platforms:" << QGuiApplication::platformName();
+    qDebug() << "Current platform:" << app.platformName();
+    
     QQmlApplicationEngine engine;
+    
+    qDebug() << "Loading QML file...";
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     
     if (engine.rootObjects().isEmpty()) {
+        qDebug() << "Failed to load QML";
         return -1;
     }
-
+    
+    qDebug() << "Application started successfully";
     return app.exec();
 } 
