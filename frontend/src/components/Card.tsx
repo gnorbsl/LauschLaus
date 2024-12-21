@@ -9,16 +9,19 @@ const CardContainer = styled.li`
   transition: transform 0.2s, background 0.2s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  will-change: transform, background;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   
   @media (hover: hover) {
     &:hover {
       background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.02);
+      transform: scale(1.02) translateZ(0);
     }
   }
   
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.98) translateZ(0);
     background: rgba(255, 255, 255, 0.3);
   }
 `;
@@ -79,25 +82,20 @@ const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, name
   target.src = `https://placehold.co/100x100/rgba(255,255,255,0.1)/white?text=${getEmoji(name)}`;
 };
 
-export const Card: React.FC<CardProps> = ({ name, imageUrl, onClick }) => {
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Prevent default to avoid any unwanted behaviors
-    e.preventDefault();
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
+export const Card: React.FC<CardProps> = React.memo(({ name, imageUrl, onClick }) => {
+  const handleTouch = React.useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     onClick();
-  };
+  }, [onClick]);
 
   return (
     <CardContainer 
       onClick={onClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      onTouchStart={handleTouch}
     >
       <CardContent>
         <CoverArt 
+          loading="lazy"
           src={imageUrl || `https://placehold.co/100x100/rgba(255,255,255,0.1)/white?text=${getEmoji(name)}`}
           alt={name}
           onError={(e) => handleImageError(e, name)}
@@ -106,4 +104,4 @@ export const Card: React.FC<CardProps> = ({ name, imageUrl, onClick }) => {
       </CardContent>
     </CardContainer>
   );
-}; 
+}); 
