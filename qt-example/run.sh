@@ -4,7 +4,11 @@
 if ! command -v matchbox-window-manager &> /dev/null; then
     echo "Installing required packages..."
     sudo apt-get update
-    sudo apt-get install -y matchbox-window-manager x11-xserver-utils
+    sudo apt-get install -y \
+        matchbox-window-manager \
+        x11-xserver-utils \
+        fonts-noto-color-emoji \
+        fonts-symbola
 fi
 
 # Kill any existing X server and related processes
@@ -37,10 +41,16 @@ export QML_DISABLE_DISK_CACHE=0
 export QSG_RENDER_LOOP=basic
 export QT_X11_NO_MITSHM=1
 export QML_FIXED_ANIMATION_STEP=16
+export QT_QPA_FONTDIR=/usr/share/fonts
+export FONTCONFIG_PATH=/etc/fonts
+export XDG_DATA_DIRS=/usr/share
 
 # Create cache directory
 mkdir -p /tmp/qml-cache
 chmod 700 /tmp/qml-cache
+
+# Update font cache
+fc-cache -f
 
 # Copy X session configuration
 cp .xinitrc ~/

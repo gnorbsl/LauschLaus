@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QWindow>
 #include <QQuickWindow>
+#include <QFontDatabase>
 
 int main(int argc, char *argv[])
 {
@@ -10,6 +11,9 @@ int main(int argc, char *argv[])
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");  // Use basic style for better performance
     qputenv("QML_DISABLE_DISK_CACHE", "0");       // Enable QML disk cache
     qputenv("QSG_RENDER_LOOP", "basic");          // Use basic render loop for embedded systems
+    
+    // Font rendering settings
+    qputenv("QT_QPA_FONTDIR", "/usr/share/fonts");
     
     // Enable debug output
     qputenv("QT_DEBUG_PLUGINS", "1");
@@ -23,6 +27,9 @@ int main(int argc, char *argv[])
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     
     QGuiApplication app(argc, argv);
+    
+    // Load emoji fonts
+    QFontDatabase::addApplicationFont("/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
     
     // Enable shader disk cache
     QQuickWindow::setSceneGraphBackend(QSGRendererInterface::Software);

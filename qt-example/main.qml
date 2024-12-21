@@ -138,6 +138,8 @@ Window {
                         Layout.alignment: Qt.AlignCenter
                         text: model.emoji
                         font.pixelSize: 72
+                        font.family: "Noto Color Emoji, Symbola"
+                        renderType: Text.NativeRendering
                     }
 
                     Text {
@@ -274,6 +276,8 @@ Window {
                         Layout.alignment: Qt.AlignCenter
                         text: model.emoji
                         font.pixelSize: 72
+                        font.family: "Noto Color Emoji, Symbola"
+                        renderType: Text.NativeRendering
                     }
 
                     Text {
