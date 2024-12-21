@@ -330,20 +330,23 @@ Window {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    spacing: 20
+                    anchors.margins: 20
+                    spacing: 30
+
+                    Item { Layout.fillHeight: true } // Spacer
 
                     // Album art / emoji
                     Rectangle {
                         Layout.alignment: Qt.AlignCenter
-                        Layout.preferredWidth: 300
-                        Layout.preferredHeight: 300
+                        Layout.preferredWidth: 240
+                        Layout.preferredHeight: 240
                         color: Qt.rgba(1, 1, 1, 0.1)
                         radius: 12
 
                         Text {
                             anchors.centerIn: parent
                             text: getEmoji(currentAlbum)
-                            font.pixelSize: 200
+                            font.pixelSize: 160
                             font.family: "Noto Color Emoji"
                         }
                     }
@@ -351,28 +354,32 @@ Window {
                     // Track name
                     Text {
                         Layout.alignment: Qt.AlignCenter
-                        text: currentTrack
+                        Layout.maximumWidth: parent.width - 40
+                        text: currentTrack || "No track playing"
                         color: "white"
                         font.pixelSize: 24
                         font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
                     }
 
                     // Playback controls
                     RowLayout {
                         Layout.alignment: Qt.AlignCenter
-                        spacing: 20
+                        Layout.preferredHeight: 100
+                        spacing: 40
 
                         // Previous track
                         Rectangle {
-                            width: 60
-                            height: 60
-                            radius: 30
+                            Layout.preferredWidth: 80
+                            Layout.preferredHeight: 80
+                            radius: 40
                             color: Qt.rgba(1, 1, 1, 0.2)
 
                             Text {
                                 anchors.centerIn: parent
                                 text: "⏮️"
-                                font.pixelSize: 24
+                                font.pixelSize: 32
                             }
 
                             MouseArea {
@@ -383,15 +390,15 @@ Window {
 
                         // Play/Pause
                         Rectangle {
-                            width: 80
-                            height: 80
-                            radius: 40
+                            Layout.preferredWidth: 100
+                            Layout.preferredHeight: 100
+                            radius: 50
                             color: Qt.rgba(1, 1, 1, 0.2)
 
                             Text {
                                 anchors.centerIn: parent
                                 text: isPlaying ? "⏸️" : "▶️"
-                                font.pixelSize: 32
+                                font.pixelSize: 40
                             }
 
                             MouseArea {
@@ -402,15 +409,15 @@ Window {
 
                         // Next track
                         Rectangle {
-                            width: 60
-                            height: 60
-                            radius: 30
+                            Layout.preferredWidth: 80
+                            Layout.preferredHeight: 80
+                            radius: 40
                             color: Qt.rgba(1, 1, 1, 0.2)
 
                             Text {
                                 anchors.centerIn: parent
                                 text: "⏭️"
-                                font.pixelSize: 24
+                                font.pixelSize: 32
                             }
 
                             MouseArea {
@@ -419,6 +426,8 @@ Window {
                             }
                         }
                     }
+
+                    Item { Layout.fillHeight: true } // Spacer
                 }
             }
         }
