@@ -1,14 +1,17 @@
 #!/bin/sh
 
-# Load X resources
-xrdb -merge ~/.Xresources
+# Enable error logging
+exec 1>/tmp/xinitrc.log 2>&1
 
-# Start a minimal window manager
+# Set background color
+xsetroot -solid "#4158D0"
+
+# Start window manager
 matchbox-window-manager -use_cursor no &
 
-# Execute our application
-cd /home/dietpi/LauschLaus/qt-example
-./build/KidsPlayer
+# Wait a moment for window manager to start
+sleep 2
 
-# Keep the X session running
-exec sleep infinity 
+# Start our application
+cd /home/dietpi/LauschLaus/qt-example
+exec ./build/KidsPlayer

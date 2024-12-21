@@ -7,10 +7,13 @@ if ! command -v matchbox-window-manager &> /dev/null; then
     sudo apt-get install -y matchbox-window-manager x11-xserver-utils
 fi
 
-# Copy our X session configuration
-cp .xinitrc ~/
+# Kill any existing X server and related processes
+sudo killall X matchbox-window-manager KidsPlayer 2>/dev/null
 
-# Set up X11 environment
+# Clean up any existing X locks
+sudo rm -f /tmp/.X0-lock
+
+# Set up environment
 export DISPLAY=:0
 export XAUTHORITY=$HOME/.Xauthority
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
@@ -22,16 +25,21 @@ if [ ! -d "$XDG_RUNTIME_DIR" ]; then
     sudo chown $(id -u):$(id -g) $XDG_RUNTIME_DIR
 fi
 
-# Enable debug output
+# Qt configuration
 export QT_DEBUG_PLUGINS=1
 export QT_LOGGING_RULES="qt.qpa.*=true"
 export QT_QPA_PLATFORM=xcb
+export QT_QPA_GENERIC_PLUGINS=evdevtouch:/dev/input/event0
 
-# Kill any existing X server
-sudo killall X
+# Copy X session configuration
+cp .xinitrc ~/
 
-# Start X with our configuration
+# Build the application
+./build.sh
+
+# Start X server with our configuration
 startx -- -nocursor
 
-# Run the application
-./build/KidsPlayer 2>&1 | tee app.log
+# Show logs if something goes wrong
+echo "Checking logs..."
+cat /tmp/xinitrc.log
