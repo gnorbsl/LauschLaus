@@ -138,8 +138,14 @@ curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | sud
 
 # Configure File Browser
 echo "🔧 Configuring File Browser..."
-sudo filebrowser config init
-sudo filebrowser config set --branding.name "LauschLaus"
+# Create directory for File Browser data
+sudo mkdir -p /var/lib/filebrowser
+sudo chown $USER:$USER /var/lib/filebrowser
+
+# Initialize File Browser with correct database path
+sudo filebrowser config init -d /var/lib/filebrowser/filebrowser.db
+sudo filebrowser config set -d /var/lib/filebrowser/filebrowser.db --branding.name "LauschLaus"
+sudo chown $USER:$USER /var/lib/filebrowser/filebrowser.db
 
 # Create systemd service for File Browser
 echo "🔧 Creating systemd service for File Browser..."
@@ -149,9 +155,10 @@ Description=File Browser
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/filebrowser -a 0.0.0.0 -r ~/Music/LauschLaus
+ExecStart=/usr/local/bin/filebrowser -d /var/lib/filebrowser/filebrowser.db -a 0.0.0.0 -r ~/Music/LauschLaus
 Restart=on-failure
 User=$USER
+WorkingDirectory=/var/lib/filebrowser
 
 [Install]
 WantedBy=multi-user.target
@@ -183,7 +190,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=$HOME/LauschLaus/frontend
-ExecStart=/usr/bin/npm run preview --host $LOCAL_IP
+ExecStart=/usr/bin/npm run preview -- --host $LOCAL_IP
 Restart=on-failure
 User=$USER
 Environment=PORT=3000
