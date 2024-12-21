@@ -9,8 +9,9 @@ int main(int argc, char *argv[])
     qputenv("QT_DEBUG_PLUGINS", "1");
     qputenv("QT_LOGGING_RULES", "qt.qpa.*=true");
     
-    // Use offscreen platform
-    qputenv("QT_QPA_PLATFORM", "offscreen");
+    // Use XCB (X11) platform
+    qputenv("QT_QPA_PLATFORM", "xcb");
+    qputenv("DISPLAY", ":0");
     
     QGuiApplication app(argc, argv);
     
@@ -32,6 +33,7 @@ int main(int argc, char *argv[])
     if (window) {
         window->setFlag(Qt::FramelessWindowHint);
         window->showFullScreen();
+        qDebug() << "Window shown in fullscreen mode";
     }
     
     qDebug() << "Application started successfully";
