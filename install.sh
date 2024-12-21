@@ -287,7 +287,7 @@ else
     sudo systemctl start filebrowser
     sudo systemctl start lausch-laus-monitor
 fi
-
+cd ~/LauschLaus
 echo "✨ Installation complete!"
 echo "🌐 You can access LauschLaus at http://$LOCAL_IP:3000"
 echo "⚙️ Mopidy is running on port 6680"
