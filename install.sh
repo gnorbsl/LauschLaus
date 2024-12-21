@@ -95,10 +95,17 @@ echo "📁 Creating default music directory..."
 mkdir -p ~/Music/LauschLaus
 sudo chown -R $USER:$USER ~/Music/LauschLaus
 
-# Clone LauschLaus repository
-echo "📦 Cloning LauschLaus repository..."
-git clone https://github.com/gnorbsl/LauschLaus.git
-cd LauschLaus
+# Clone or update LauschLaus repository
+echo "📦 Setting up LauschLaus repository..."
+if [ -d "LauschLaus" ]; then
+    echo "📂 Repository exists, updating..."
+    cd LauschLaus
+    git pull
+else
+    echo "📥 Cloning repository..."
+    git clone https://github.com/gnorbsl/LauschLaus.git
+    cd LauschLaus
+fi
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
