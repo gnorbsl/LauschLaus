@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QDebug>
+#include <QWindow>
 
 int main(int argc, char *argv[])
 {
@@ -8,12 +9,8 @@ int main(int argc, char *argv[])
     qputenv("QT_DEBUG_PLUGINS", "1");
     qputenv("QT_LOGGING_RULES", "qt.qpa.*=true");
     
-    // Use Linux Framebuffer
-    qputenv("QT_QPA_PLATFORM", "linuxfb");
-    qputenv("QT_QPA_FB_DEV", "/dev/fb0");
-    qputenv("QT_QPA_FB_TTY", "/dev/tty1");
-    qputenv("QT_QPA_FB_HIDECURSOR", "1");
-    qputenv("QT_QPA_FB_TSLIB", "1");
+    // Use offscreen platform
+    qputenv("QT_QPA_PLATFORM", "offscreen");
     
     QGuiApplication app(argc, argv);
     
@@ -28,6 +25,13 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty()) {
         qDebug() << "Failed to load QML";
         return -1;
+    }
+    
+    // Get the main window
+    QWindow *window = qobject_cast<QWindow*>(engine.rootObjects().first());
+    if (window) {
+        window->setFlag(Qt::FramelessWindowHint);
+        window->showFullScreen();
     }
     
     qDebug() << "Application started successfully";
