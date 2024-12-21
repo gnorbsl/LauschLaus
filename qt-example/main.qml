@@ -7,134 +7,89 @@ import QtGraphicalEffects 1.15
 Window {
     id: root
     visible: true
+    width: 800
+    height: 480
     visibility: Window.FullScreen
     flags: Qt.FramelessWindowHint
     title: "LauschLaus"
     
+    // Background
     Rectangle {
+        id: background
         anchors.fill: parent
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#4158D0" }
             GradientStop { position: 0.46; color: "#C850C0" }
             GradientStop { position: 1.0; color: "#FFCC70" }
         }
-
-        // Debug info
-        Text {
-            id: debugText
-            anchors.top: parent.top
-            anchors.left: parent.left
-            color: "white"
-            font.pixelSize: 12
-            z: 100
-            text: "Screen size: " + parent.width + "x" + parent.height
-        }
     }
 
-    // Main content area
-    Rectangle {
+    // Main content
+    GridLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        color: "transparent"
+        anchors.margins: 10
+        columns: 4
+        rowSpacing: 10
+        columnSpacing: 10
 
-        Column {
-            anchors.fill: parent
-            spacing: 8
+        Repeater {
+            model: 7
+            delegate: Rectangle {
+                id: card
+                Layout.preferredWidth: 185  // (800 - 2*10 - 3*10) / 4
+                Layout.preferredHeight: 220
+                radius: 8
+                color: Qt.rgba(1, 1, 1, 0.2)
+                
+                // Debug border
+                border.width: 1
+                border.color: "red"
 
-            // First row
-            Row {
-                spacing: 8
-                anchors.horizontalCenter: parent.horizontalCenter
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 4
 
-                Repeater {
-                    model: 4  // First 4 items
-                    delegate: ArtistCard {
-                        artistName: getArtistName(index)
+                    Rectangle {
+                        Layout.alignment: Qt.AlignCenter
+                        width: 160
+                        height: 160
+                        color: Qt.rgba(1, 1, 1, 0.1)
+                        radius: 6
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: getEmoji(getArtistName(index))
+                            font.pixelSize: 72
+                            font.family: "Noto Color Emoji"
+                        }
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignCenter
+                        Layout.fillWidth: true
+                        text: getArtistName(index)
+                        color: "white"
+                        font.pixelSize: 14
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
                     }
                 }
-            }
 
-            // Second row
-            Row {
-                spacing: 8
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                Repeater {
-                    model: 3  // Last 3 items
-                    delegate: ArtistCard {
-                        artistName: getArtistName(index + 4)
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        console.log("Clicked:", getArtistName(index))
                     }
                 }
-            }
-        }
-    }
 
-    // Artist Card Component
-    component ArtistCard: Rectangle {
-        property string artistName
-        id: card
-        width: 140
-        height: 180
-        radius: 8
-        color: Qt.rgba(1, 1, 1, 0.2)
-        
-        scale: mouseArea.pressed ? 0.95 : mouseArea.containsMouse ? 1.02 : 1.0
-        Behavior on scale {
-            NumberAnimation {
-                duration: 150
-                easing.type: Easing.OutQuad
-            }
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 8
-            spacing: 4
-
-            Rectangle {
-                Layout.alignment: Qt.AlignCenter
-                width: 135
-                height: 135
-                color: Qt.rgba(1, 1, 1, 0.1)
-                radius: 6
-
-                Text {
-                    anchors.centerIn: parent
-                    text: getEmoji(artistName)
-                    font.pixelSize: 72
-                    font.family: "Noto Color Emoji"
+                Component.onCompleted: {
+                    console.log("Created card for:", getArtistName(index))
                 }
             }
-
-            Text {
-                Layout.alignment: Qt.AlignCenter
-                Layout.fillWidth: true
-                text: artistName
-                color: "white"
-                font.pixelSize: 14
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
-            }
-        }
-
-        MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: {
-                console.log("Clicked:", artistName)
-                debugText.text = "Clicked: " + artistName
-            }
-            onContainsMouseChanged: {
-                if (containsMouse) {
-                    debugText.text = "Hovering: " + artistName
-                }
-            }
-        }
-
-        Component.onCompleted: {
-            console.log("Created card for:", artistName)
         }
     }
 
