@@ -1,24 +1,19 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QScreen>
 
 int main(int argc, char *argv[])
 {
-    // Set EGLFS as the default platform
-    qputenv("QT_QPA_PLATFORM", "eglfs");
-    
-    // Configure EGLFS for Raspberry Pi
-    qputenv("QT_QPA_EGLFS_INTEGRATION", "eglfs_brcm");
-    qputenv("QT_QPA_EGLFS_PHYSICAL_WIDTH", "800");
-    qputenv("QT_QPA_EGLFS_PHYSICAL_HEIGHT", "480");
-    qputenv("QT_QPA_EGLFS_HIDECURSOR", "1");
-    
-    // Set the FB device
-    qputenv("QT_QPA_EGLFS_FB", "/dev/fb0");
+    // Use X11 platform
+    qputenv("QT_QPA_PLATFORM", "xcb");
+    qputenv("DISPLAY", ":0");
     
     QGuiApplication app(argc, argv);
+    
+    // Set up fullscreen on the primary screen
     QQmlApplicationEngine engine;
-
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    
     if (engine.rootObjects().isEmpty()) {
         return -1;
     }

@@ -1,18 +1,16 @@
 #!/bin/bash
 
-# Set environment variables
-export QT_QPA_EGLFS_KMS_CONFIG=$(pwd)/eglfs.json
-export QT_QPA_PLATFORM=eglfs
-export QT_QPA_EGLFS_INTEGRATION=eglfs_brcm
-export QT_QPA_EGLFS_PHYSICAL_WIDTH=800
-export QT_QPA_EGLFS_PHYSICAL_HEIGHT=480
-export QT_QPA_EGLFS_HIDECURSOR=1
-export QT_QPA_EGLFS_FB=/dev/fb0
+# Make sure X is running
+if ! ps aux | grep -v grep | grep -q "X.*:0"; then
+    echo "Starting X server..."
+    startx &
+    sleep 5  # Wait for X to start
+fi
 
-# Make sure we have access to the framebuffer
-if [ ! -w /dev/fb0 ]; then
-    echo "Need root access for framebuffer"
-    sudo ./build/KidsPlayer
-else
-    ./build/KidsPlayer
-fi 
+# Set environment variables for X11
+export DISPLAY=:0
+export QT_QPA_PLATFORM=xcb
+export XAUTHORITY=$HOME/.Xauthority
+
+# Run the application
+./build/KidsPlayer 
