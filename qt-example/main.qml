@@ -328,18 +328,16 @@ Window {
                 visible: currentView === "player"
                 color: "transparent"
 
-                ColumnLayout {
+                Column {
                     anchors.fill: parent
-                    anchors.margins: 20
                     spacing: 30
-
-                    Item { Layout.fillHeight: true } // Spacer
+                    anchors.margins: 20
 
                     // Album art / emoji
                     Rectangle {
-                        Layout.alignment: Qt.AlignCenter
-                        Layout.preferredWidth: 240
-                        Layout.preferredHeight: 240
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: 240
+                        height: 240
                         color: Qt.rgba(1, 1, 1, 0.1)
                         radius: 12
 
@@ -353,8 +351,8 @@ Window {
 
                     // Track name
                     Text {
-                        Layout.alignment: Qt.AlignCenter
-                        Layout.maximumWidth: parent.width - 40
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: parent.width - 40
                         text: currentTrack || "No track playing"
                         color: "white"
                         font.pixelSize: 24
@@ -364,15 +362,15 @@ Window {
                     }
 
                     // Playback controls
-                    RowLayout {
-                        Layout.alignment: Qt.AlignCenter
-                        Layout.preferredHeight: 100
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
                         spacing: 40
+                        height: 100
 
                         // Previous track
                         Rectangle {
-                            Layout.preferredWidth: 80
-                            Layout.preferredHeight: 80
+                            width: 80
+                            height: 80
                             radius: 40
                             color: Qt.rgba(1, 1, 1, 0.2)
 
@@ -390,8 +388,8 @@ Window {
 
                         // Play/Pause
                         Rectangle {
-                            Layout.preferredWidth: 100
-                            Layout.preferredHeight: 100
+                            width: 100
+                            height: 100
                             radius: 50
                             color: Qt.rgba(1, 1, 1, 0.2)
 
@@ -409,8 +407,8 @@ Window {
 
                         // Next track
                         Rectangle {
-                            Layout.preferredWidth: 80
-                            Layout.preferredHeight: 80
+                            width: 80
+                            height: 80
                             radius: 40
                             color: Qt.rgba(1, 1, 1, 0.2)
 
@@ -426,8 +424,6 @@ Window {
                             }
                         }
                     }
-
-                    Item { Layout.fillHeight: true } // Spacer
                 }
             }
         }
