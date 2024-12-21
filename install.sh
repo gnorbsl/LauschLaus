@@ -116,6 +116,9 @@ echo "📦 Installing frontend dependencies..."
 cd frontend
 npm install
 npm run build
+# copy example environment file
+cp .env.example .env
+
 cd ..
 
 # Configure Mopidy
@@ -230,14 +233,14 @@ do_scan
 
 inotifywait -m -r -e \$EVENTS "\$MUSIC_DIR" | while read -r directory events filename; do
     echo "📀 Detected changes in music directory: \$events on \$filename"
-    
+
     # Get current time and last scan time
     current_time=\$(date +%s)
     last_scan_time=\$(cat "\$LAST_SCAN_FILE" 2>/dev/null || echo 0)
-    
+
     # Calculate time difference
     time_diff=\$((current_time - last_scan_time))
-    
+
     # If enough time has passed since last scan
     if [ \$time_diff -ge \$DEBOUNCE_SECONDS ]; then
         echo "⏰ Debounce period passed, scanning..."
@@ -292,4 +295,4 @@ echo "✨ Installation complete!"
 echo "🌐 You can access LauschLaus at http://$LOCAL_IP:3000"
 echo "⚙️ Mopidy is running on port 6680"
 echo "📂 File Browser is available at http://$LOCAL_IP:8080"
-echo "💡 Your music directory is located at ~/Music/LauschLaus" 
+echo "💡 Your music directory is located at ~/Music/LauschLaus"
