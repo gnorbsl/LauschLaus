@@ -17,6 +17,7 @@ Window {
     // View state management
     property string currentView: "artists"
     property string selectedArtist: ""
+    property string mopidyServerUrl: "http://localhost:6680"
     property var artistList: []
     property var albumList: []
     property string currentTrack: ""
@@ -66,15 +67,45 @@ Window {
                         getAlbumImage(currentAlbumUri);
                     }
                 }
-            } else if (msg.id === "getImages") {
-                if (msg.result && msg.result[currentAlbumUri] && msg.result[currentAlbumUri].length > 0) {
-                    var images = msg.result[currentAlbumUri];
-                    // Sort by width to get the largest image
+            } else if (msg.id && msg.id.startsWith("getArtistImage_")) {
+                var artistUri = msg.id.replace("getArtistImage_", "")
+                if (msg.result && msg.result[artistUri] && msg.result[artistUri].length > 0) {
+                    var images = msg.result[artistUri]
                     images.sort(function(a, b) {
-                        return (b.width || 0) - (a.width || 0);
-                    });
+                        return (b.width || 0) - (a.width || 0)
+                    })
                     if (images[0].uri) {
-                        currentAlbumImage = "http://localhost:6680" + images[0].uri;
+                        // Find and update the artist in the model
+                        for (var i = 0; i < artistsModel.count; i++) {
+                            if (artistsModel.get(i).uri === artistUri) {
+                                artistsModel.setProperty(i, "imageUrl", mopidyServerUrl + images[0].uri)
+                                console.log("Set artist image URL:", mopidyServerUrl + images[0].uri)
+                                break
+                            }
+                        }
+                    }
+                }
+            } else if (msg.id && msg.id.startsWith("getAlbumImage_")) {
+                var albumUri = msg.id.replace("getAlbumImage_", "")
+                if (msg.result && msg.result[albumUri] && msg.result[albumUri].length > 0) {
+                    var albumImages = msg.result[albumUri]
+                    albumImages.sort(function(a, b) {
+                        return (b.width || 0) - (a.width || 0)
+                    })
+                    if (albumImages[0].uri) {
+                        var imageUrl = mopidyServerUrl + albumImages[0].uri
+                        console.log("Set album image URL:", imageUrl)
+                        // Update album in model or current album image
+                        if (albumUri === currentAlbumUri) {
+                            currentAlbumImage = imageUrl
+                        }
+                        // Update album in grid if it exists
+                        for (var j = 0; j < albumsModel.count; j++) {
+                            if (albumsModel.get(j).uri === albumUri) {
+                                albumsModel.setProperty(j, "imageUrl", imageUrl)
+                                break
+                            }
+                        }
                     }
                 }
             }
@@ -195,12 +226,23 @@ Window {
                             height: width
                             color: Qt.rgba(1, 1, 1, 0.1)
                             radius: 6
+                            clip: true
+
+                            Image {
+                                id: artistImage
+                                anchors.fill: parent
+                                source: model.imageUrl || ""
+                                fillMode: Image.PreserveAspectCrop
+                                visible: status === Image.Ready
+                                asynchronous: true
+                            }
 
                             Text {
                                 anchors.centerIn: parent
                                 text: getEmoji(model.name)
                                 font.pixelSize: 72
                                 font.family: "Noto Color Emoji"
+                                visible: artistImage.status !== Image.Ready
                             }
                         }
 
@@ -246,6 +288,10 @@ Window {
                             script: currentView = "albums"
                         }
                     }
+
+                    Component.onCompleted: {
+                        getArtistImage(model.uri)
+                    }
                 }
             }
 
@@ -283,12 +329,23 @@ Window {
                             height: width
                             color: Qt.rgba(1, 1, 1, 0.1)
                             radius: 6
+                            clip: true
+
+                            Image {
+                                id: albumImage
+                                anchors.fill: parent
+                                source: model.imageUrl || ""
+                                fillMode: Image.PreserveAspectCrop
+                                visible: status === Image.Ready
+                                asynchronous: true
+                            }
 
                             Text {
                                 anchors.centerIn: parent
                                 text: model.emoji || "💿"
                                 font.pixelSize: 72
                                 font.family: "Noto Color Emoji"
+                                visible: albumImage.status !== Image.Ready
                             }
                         }
 
@@ -332,6 +389,10 @@ Window {
                         ScriptAction {
                             script: currentView = "player"
                         }
+                    }
+
+                    Component.onCompleted: {
+                        getAlbumImage(model.uri)
                     }
                 }
             }
@@ -480,14 +541,22 @@ Window {
                         height: width
                         color: Qt.rgba(1, 1, 1, 0.1)
                         radius: 12
+                        clip: true
 
                         Image {
                             id: albumArtImage
                             anchors.fill: parent
-                            source: currentAlbumImage
-                            fillMode: Image.PreserveAspectFit
+                            source: currentAlbumImage || ""
+                            fillMode: Image.PreserveAspectCrop
                             visible: status === Image.Ready
-                            smooth: true
+                            asynchronous: true
+                            cache: false
+
+                            onStatusChanged: {
+                                if (status === Image.Error) {
+                                    console.log("Error loading image:", source)
+                                }
+                            }
                         }
 
                         Text {
@@ -495,7 +564,7 @@ Window {
                             text: getEmoji(currentAlbum)
                             font.pixelSize: Math.min(parent.width, parent.height) * 0.6
                             font.family: "Noto Color Emoji"
-                            visible: albumArtImage.status !== Image.Ready
+                            visible: !currentAlbumImage || albumArtImage.status !== Image.Ready
                         }
                     }
                 }
@@ -558,7 +627,8 @@ Window {
             artists.push({
                 name: artist.name,
                 uri: artist.uri,
-                type: "artist"
+                type: "artist",
+                imageUrl: ""
             })
         }
         return artists
@@ -571,7 +641,8 @@ Window {
             albums.push({
                 name: album.name,
                 uri: album.uri,
-                emoji: getEmoji(album.name)
+                emoji: getEmoji(album.name),
+                imageUrl: ""
             })
         }
         return albums
@@ -598,9 +669,15 @@ Window {
         onTriggered: getCurrentTrack()
     }
 
+    function getArtistImage(artistUri) {
+        if (artistUri) {
+            sendRequest("core.library.getImages", { uris: [artistUri] }, "getArtistImage_" + artistUri)
+        }
+    }
+
     function getAlbumImage(albumUri) {
         if (albumUri) {
-            sendRequest("core.library.getImages", { uris: [albumUri] }, "getImages")
+            sendRequest("core.library.getImages", { uris: [albumUri] }, "getAlbumImage_" + albumUri)
         }
     }
 } 
