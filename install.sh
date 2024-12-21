@@ -149,8 +149,15 @@ echo "🔧 Configuring File Browser..."
 sudo mkdir -p /var/lib/filebrowser
 sudo chown $USER:$USER /var/lib/filebrowser
 
-# Initialize File Browser with correct database path
-sudo filebrowser config init -d /var/lib/filebrowser/filebrowser.db
+# Initialize or update File Browser configuration
+if [ ! -f "/var/lib/filebrowser/filebrowser.db" ]; then
+    echo "📥 Initializing File Browser database..."
+    sudo filebrowser config init -d /var/lib/filebrowser/filebrowser.db
+else
+    echo "📝 Updating existing File Browser configuration..."
+fi
+
+# Set or update branding
 sudo filebrowser config set -d /var/lib/filebrowser/filebrowser.db --branding.name "LauschLaus"
 sudo chown $USER:$USER /var/lib/filebrowser/filebrowser.db
 
