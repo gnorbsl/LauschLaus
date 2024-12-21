@@ -671,13 +671,13 @@ Window {
 
     function getArtistImage(artistUri) {
         if (artistUri) {
-            sendRequest("core.library.getImages", { uris: [artistUri] }, "getArtistImage_" + artistUri)
+            sendRequest("library.getImages", { uris: [artistUri] }, "getArtistImage_" + artistUri)
         }
     }
 
     function getAlbumImage(albumUri) {
         if (albumUri) {
-            sendRequest("core.library.getImages", { uris: [albumUri] }, "getAlbumImage_" + albumUri)
+            sendRequest("library.getImages", { uris: [albumUri] }, "getAlbumImage_" + albumUri)
         }
     }
 } 
