@@ -54,8 +54,8 @@ const Navigation = styled.nav`
   flex-shrink: 0;
 `;
 
-const NavButton = styled.button<{ active?: boolean }>`
-  background: ${props => props.active 
+const NavButton = styled.button<{ $active?: boolean }>`
+  background: ${props => props.$active 
     ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2))' 
     : 'rgba(255, 255, 255, 0.1)'};
   border: none;
@@ -72,7 +72,7 @@ const NavButton = styled.button<{ active?: boolean }>`
   transition: all 0.2s ease;
   margin-right: 0.5rem;
   flex: 1;
-  box-shadow: ${props => props.active 
+  box-shadow: ${props => props.$active 
     ? '0 6px 12px rgba(0, 0, 0, 0.15)' 
     : '0 4px 8px rgba(0, 0, 0, 0.1)'};
 
@@ -111,7 +111,7 @@ const WifiButton = styled(NavButton)`
   flex: 0 0 auto;
   font-size: 2.2rem;
   padding: 0.75rem;
-  background: ${props => props.active 
+  background: ${props => props.$active 
     ? 'rgba(255, 255, 255, 0.25)' 
     : 'rgba(255, 255, 255, 0.1)'};
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -215,9 +215,8 @@ const App: React.FC = () => {
     let mopidy: Mopidy;
     
     const initMopidy = () => {
-        console.log(import.meta.env.VITE_MOPIDY_WS_URL)
       mopidy = new Mopidy({
-        webSocketUrl: import.meta.env.VITE_MOPIDY_WS_URL,
+        webSocketUrl: '/mopidy/ws',
       });
 
       mopidy.on('websocket:error', () => {
@@ -401,21 +400,21 @@ const App: React.FC = () => {
           )}
           <NavIcons>
             <NavButton 
-              active={activeTab === 'audiobooks'} 
+              $active={activeTab === 'audiobooks'} 
               onClick={() => setActiveTab('audiobooks')}
               title="Audiobooks"
             >
               📚
             </NavButton>
             <NavButton 
-              active={activeTab === 'music'} 
+              $active={activeTab === 'music'} 
               onClick={() => setActiveTab('music')}
               title="Music"
             >
               🎵
             </NavButton>
             <NavButton 
-              active={activeTab === 'favorites'} 
+              $active={activeTab === 'favorites'} 
               onClick={() => setActiveTab('favorites')}
               title="Favorites"
             >
