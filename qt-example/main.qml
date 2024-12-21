@@ -19,6 +19,9 @@ Window {
     property string selectedArtist: ""
     property var artistList: []
     property var albumList: []
+    property string currentTrack: ""
+    property string currentAlbum: ""
+    property bool isPlaying: false
     
     // WebSocket for Mopidy connection
     WebSocket {
@@ -31,7 +34,11 @@ Window {
             console.log("Received message:", JSON.stringify(msg))
             
             if (msg.event === "state_changed") {
-                // Handle state changes
+                if (msg.new_state === "playing") {
+                    isPlaying = true;
+                } else if (msg.new_state === "stopped" || msg.new_state === "paused") {
+                    isPlaying = false;
+                }
                 return
             }
             
@@ -48,6 +55,11 @@ Window {
                 for (var j = 0; j < albumList.length; j++) {
                     albumsModel.append(albumList[j])
                 }
+            } else if (msg.id === "getCurrentTrack") {
+                if (msg.result && msg.result.name) {
+                    currentTrack = msg.result.name;
+                    currentAlbum = msg.result.album ? msg.result.album.name : "";
+                }
             }
         }
         
@@ -56,6 +68,8 @@ Window {
                 console.log("WebSocket connected")
                 // Get initial list of artists
                 getArtists()
+                // Get current playback state
+                getCurrentTrack()
             }
         }
     }
@@ -76,7 +90,7 @@ Window {
             height: 60
             radius: 30
             color: Qt.rgba(1, 1, 1, 0.2)
-            visible: currentView === "albums"
+            visible: currentView === "albums" || currentView === "player"
             x: 10
             y: 10
             z: 1
@@ -90,13 +104,17 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    currentView = "artists"
-                    selectedArtist = ""
+                    if (currentView === "player") {
+                        currentView = "albums"
+                    } else {
+                        currentView = "artists"
+                        selectedArtist = ""
+                    }
                 }
             }
         }
 
-        // Title bar for album view
+        // Title bar for album/player view
         Rectangle {
             id: titleBar
             height: 60
@@ -107,12 +125,12 @@ Window {
                 margins: 10
             }
             color: "transparent"
-            visible: currentView === "albums"
+            visible: currentView === "albums" || currentView === "player"
             z: 1
 
             Text {
                 anchors.centerIn: parent
-                text: selectedArtist
+                text: currentView === "player" ? currentAlbum : selectedArtist
                 color: "white"
                 font.pixelSize: 24
                 font.bold: true
@@ -273,6 +291,7 @@ Window {
                         anchors.fill: parent
                         onClicked: {
                             console.log("Album clicked:", model.name)
+                            currentAlbum = model.name
                             playAlbum(model.uri)
                             parent.scale = 0.95
                             albumClickAnim.start()
@@ -292,6 +311,112 @@ Window {
                             property: "scale"
                             to: 1.0
                             duration: 100
+                        }
+                        ScriptAction {
+                            script: currentView = "player"
+                        }
+                    }
+                }
+            }
+
+            // Player View
+            Rectangle {
+                id: playerView
+                anchors.fill: parent
+                anchors.margins: 10
+                anchors.topMargin: 70  // Make room for title
+                visible: currentView === "player"
+                color: "transparent"
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 20
+
+                    // Album art / emoji
+                    Rectangle {
+                        Layout.alignment: Qt.AlignCenter
+                        Layout.preferredWidth: 300
+                        Layout.preferredHeight: 300
+                        color: Qt.rgba(1, 1, 1, 0.1)
+                        radius: 12
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: getEmoji(currentAlbum)
+                            font.pixelSize: 200
+                            font.family: "Noto Color Emoji"
+                        }
+                    }
+
+                    // Track name
+                    Text {
+                        Layout.alignment: Qt.AlignCenter
+                        text: currentTrack
+                        color: "white"
+                        font.pixelSize: 24
+                        font.bold: true
+                    }
+
+                    // Playback controls
+                    RowLayout {
+                        Layout.alignment: Qt.AlignCenter
+                        spacing: 20
+
+                        // Previous track
+                        Rectangle {
+                            width: 60
+                            height: 60
+                            radius: 30
+                            color: Qt.rgba(1, 1, 1, 0.2)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⏮️"
+                                font.pixelSize: 24
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: previousTrack()
+                            }
+                        }
+
+                        // Play/Pause
+                        Rectangle {
+                            width: 80
+                            height: 80
+                            radius: 40
+                            color: Qt.rgba(1, 1, 1, 0.2)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: isPlaying ? "⏸️" : "▶️"
+                                font.pixelSize: 32
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: togglePlayPause()
+                            }
+                        }
+
+                        // Next track
+                        Rectangle {
+                            width: 60
+                            height: 60
+                            radius: 30
+                            color: Qt.rgba(1, 1, 1, 0.2)
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⏭️"
+                                font.pixelSize: 24
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: nextTrack()
+                            }
                         }
                     }
                 }
@@ -322,6 +447,29 @@ Window {
         sendRequest("core.tracklist.clear", {}, "clear")
         sendRequest("core.tracklist.add", { uri: albumUri }, "add")
         sendRequest("core.playback.play", {}, "play")
+        getCurrentTrack()
+    }
+
+    function getCurrentTrack() {
+        sendRequest("core.playback.get_current_track", {}, "getCurrentTrack")
+    }
+
+    function togglePlayPause() {
+        if (isPlaying) {
+            sendRequest("core.playback.pause", {}, "pause")
+        } else {
+            sendRequest("core.playback.play", {}, "play")
+        }
+    }
+
+    function nextTrack() {
+        sendRequest("core.playback.next", {}, "next")
+        getCurrentTrack()
+    }
+
+    function previousTrack() {
+        sendRequest("core.playback.previous", {}, "previous")
+        getCurrentTrack()
     }
 
     function processArtists(result) {
@@ -361,5 +509,13 @@ Window {
             'Tarzan': '🦍'
         };
         return emojiMap[name] || '🎵';
+    }
+
+    // Timer to periodically update current track
+    Timer {
+        interval: 1000
+        running: currentView === "player"
+        repeat: true
+        onTriggered: getCurrentTrack()
     }
 } 
