@@ -9,6 +9,8 @@ if [ "$EUID" -eq 0 ]; then
     exit 1
 fi
 
+LOCAL_IP=$(hostname -I | cut -d" " -f1)
+echo "🌐 Local IP: $LOCAL_IP"
 # Ensure $USER and $HOME are set
 if [ -z "$USER" ]; then
     USER=$(whoami)
@@ -127,6 +129,10 @@ EOL
 echo "📦 Installing File Browser..."
 curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | sudo bash
 
+# Configure File Browser
+echo "🔧 Configuring File Browser..."
+sudo filebrowser config set --branding.name "LauschLaus"
+
 # Create systemd service for File Browser
 echo "🔧 Creating systemd service for File Browser..."
 sudo tee /etc/systemd/system/filebrowser.service > /dev/null << EOL
@@ -135,7 +141,7 @@ Description=File Browser
 After=network.target
 
 [Service]
-ExecStart=/bin/bash -c '/usr/local/bin/filebrowser -a $(hostname -I | cut -d" " -f1) -r ~/Music/LauschLaus --branding.name "LauschLaus"'
+ExecStart=/usr/local/bin/filebrowser -a 0.0.0.0 -r ~/Music/LauschLaus
 Restart=on-failure
 User=$USER
 
@@ -169,7 +175,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=$HOME/LauschLaus/frontend
-ExecStart=/usr/bin/npm run preview
+ExecStart=/usr/bin/npm run preview --host $LOCAL_IP
 Restart=on-failure
 User=$USER
 Environment=PORT=3000
@@ -261,7 +267,7 @@ else
     sudo systemctl start filebrowser
     sudo systemctl start lausch-laus-monitor
 fi
-LOCAL_IP=$(hostname -I | cut -d" " -f1)
+
 echo "✨ Installation complete!"
 echo "🌐 You can access LauschLaus at http://$LOCAL_IP:3000"
 echo "⚙️ Mopidy is running on port 6680"
