@@ -1,39 +1,30 @@
 FROM debian:bullseye
 
 # Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-ENV USER=pi
-ENV HOME=/home/pi
+ENV DEBIAN_FRONTEND=noninteractive \
+    USER=pi \
+    HOME=/home/pi \
+    TESTING_ENV=true
 
-# Create pi user and set up home directory
-RUN useradd -m -s /bin/bash pi
-
-# Install basic utilities without sudo first
-RUN apt-get update && apt-get install -y \
-    wget \
-    systemd \
-    systemd-sysv \
-    gpg \
-    gnupg \
-    apt-transport-https \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install and configure sudo non-interactively
-RUN apt-get update && \
-    echo "debconf debconf/frontend select Noninteractive" | debconf-set-selections && \
-    apt-get install -y sudo && \
+# Create user, install dependencies, and set up directories in a single layer
+RUN useradd -m -s /bin/bash pi && \
+    apt-get update && \
+    apt-get install -y \
+        apt-transport-https \
+        gnupg \
+        gpg \
+        sudo \
+        systemd \
+        systemd-sysv \
+        wget \
+    && echo "debconf debconf/frontend select Noninteractive" | debconf-set-selections && \
     echo "pi ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    mkdir -p /etc/apt/keyrings /etc/apt/sources.list.d /etc/mopidy && \
+    chown -R pi:pi /etc/apt/keyrings /etc/apt/sources.list.d /etc/mopidy && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create necessary directories with proper permissions
-RUN mkdir -p /etc/apt/keyrings && \
-    chown -R pi:pi /etc/apt/keyrings && \
-    mkdir -p /etc/apt/sources.list.d && \
-    chown -R pi:pi /etc/apt/sources.list.d && \
-    mkdir -p /etc/mopidy && \
-    chown -R pi:pi /etc/mopidy
-
-# Copy installation script
+# Copy and prepare installation script
 COPY install.sh /home/pi/install.sh
 RUN chmod +x /home/pi/install.sh && \
     chown pi:pi /home/pi/install.sh

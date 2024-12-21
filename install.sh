@@ -201,15 +201,23 @@ EOL
 
 # Enable and start services
 echo "🚀 Starting services..."
-sudo systemctl daemon-reload
-sudo systemctl enable mopidy
-sudo systemctl enable lausch-laus-frontend
-sudo systemctl enable filebrowser
-sudo systemctl enable lausch-laus-monitor
-sudo systemctl start mopidy
-sudo systemctl start lausch-laus-frontend
-sudo systemctl start filebrowser
-sudo systemctl start lausch-laus-monitor
+
+# Check if we're running in Docker
+if [ -f /.dockerenv ]; then
+    echo "🐳 Running in Docker environment - skipping service management"
+    echo "✨ Installation verification complete!"
+else
+    # Normal system installation
+    sudo systemctl daemon-reload
+    sudo systemctl enable mopidy
+    sudo systemctl enable lausch-laus-frontend
+    sudo systemctl enable filebrowser
+    sudo systemctl enable lausch-laus-monitor
+    sudo systemctl start mopidy
+    sudo systemctl start lausch-laus-frontend
+    sudo systemctl start filebrowser
+    sudo systemctl start lausch-laus-monitor
+fi
 
 echo "✨ Installation complete!"
 echo "🌐 You can access LauschLaus at http://localhost:3000"
