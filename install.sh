@@ -3,7 +3,24 @@
 # Exit on error
 set -e
 
+# Check if running as root
+if [ "$EUID" -eq 0 ]; then
+    echo "❌ Please do not run this script as root"
+    exit 1
+fi
+
+# Ensure $USER and $HOME are set
+if [ -z "$USER" ]; then
+    USER=$(whoami)
+fi
+
+if [ -z "$HOME" ]; then
+    HOME=$(getent passwd "$USER" | cut -d: -f6)
+fi
+
 echo "🎵 Installing LauschLaus..."
+echo "👤 Installing as user: $USER"
+echo "🏠 Home directory: $HOME"
 
 # Update system
 echo "📦 Updating system packages..."
@@ -45,7 +62,31 @@ sudo apt-get install -y mopidy
 
 # Install Mopidy extensions
 echo "📦 Installing Mopidy extensions..."
-sudo pip3 install Mopidy-MPD Mopidy-Local
+sudo apt-get install -y python3-full python3-venv
+
+# Create virtual environment for Mopidy extensions
+echo "🐍 Creating Python virtual environment for Mopidy..."
+python3 -m venv "$HOME/.local/share/mopidy/venv"
+source "$HOME/.local/share/mopidy/venv/bin/activate"
+pip install Mopidy-MPD Mopidy-Local
+deactivate
+
+# Update Mopidy service to use virtual environment
+echo "🔧 Updating Mopidy service to use virtual environment..."
+sudo tee /etc/systemd/system/mopidy.service > /dev/null << EOL
+[Unit]
+Description=Mopidy Music Server
+After=network.target
+
+[Service]
+User=mopidy
+Environment=PATH=$HOME/.local/share/mopidy/venv/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=$HOME/.local/share/mopidy/venv/bin/mopidy
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOL
 
 # Create default music directory
 echo "📁 Creating default music directory..."
@@ -111,7 +152,8 @@ After=network.target
 
 [Service]
 User=mopidy
-ExecStart=/usr/bin/mopidy
+Environment=PATH=$HOME/.local/share/mopidy/venv/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=$HOME/.local/share/mopidy/venv/bin/mopidy
 Restart=on-failure
 
 [Install]
@@ -126,10 +168,10 @@ Description=LauschLaus Frontend
 After=network.target
 
 [Service]
-WorkingDirectory=/home/pi/LauschLaus/frontend
+WorkingDirectory=$HOME/LauschLaus/frontend
 ExecStart=/usr/bin/npm run preview
 Restart=on-failure
-User=pi
+User=$USER
 Environment=PORT=3000
 
 [Install]
@@ -145,6 +187,7 @@ MUSIC_DIR="\$HOME/Music/LauschLaus"
 EVENTS="create,delete,modify,move"
 DEBOUNCE_SECONDS=30
 LAST_SCAN_FILE="/tmp/lausch_laus_last_scan"
+MOPIDY_VENV="$HOME/.local/share/mopidy/venv"
 
 echo "🔍 Starting LauschLaus media monitor..."
 echo "📁 Watching directory: \$MUSIC_DIR"
@@ -152,7 +195,7 @@ echo "📁 Watching directory: \$MUSIC_DIR"
 # Function to perform the scan
 do_scan() {
     echo "🔄 Triggering Mopidy local scan..."
-    mopidy local scan
+    \$MOPIDY_VENV/bin/mopidy local scan
     date +%s > "\$LAST_SCAN_FILE"
 }
 
@@ -218,9 +261,9 @@ else
     sudo systemctl start filebrowser
     sudo systemctl start lausch-laus-monitor
 fi
-
+LOCAL_IP=$(hostname -I | cut -d" " -f1)
 echo "✨ Installation complete!"
-echo "🌐 You can access LauschLaus at http://localhost:3000"
+echo "🌐 You can access LauschLaus at http://$LOCAL_IP:3000"
 echo "⚙️ Mopidy is running on port 6680"
-echo "📂 File Browser is available at http://$(hostname -I | cut -d" " -f1):8080"
+echo "📂 File Browser is available at http://$LOCAL_IP:8080"
 echo "💡 Your music directory is located at ~/Music/LauschLaus" 
