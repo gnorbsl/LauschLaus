@@ -107,6 +107,9 @@ else
     cd LauschLaus
 fi
 
+# Make uninstall.sh executable
+chmod +x uninstall.sh
+
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
 cd frontend
