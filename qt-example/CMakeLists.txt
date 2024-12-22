@@ -10,12 +10,10 @@ set(CMAKE_AUTOUIC ON)
 # Find Qt5 packages
 find_package(Qt5 COMPONENTS Core Quick Gui REQUIRED)
 
-# Add platform-specific configuration
-if(UNIX AND NOT APPLE)
-    # Linux/Raspberry Pi specific settings
-    add_definitions(-DQT_QPA_PLATFORM=linuxfb)
-    add_definitions(-DUSE_LINUX_FB)
-endif()
+# Include Qt directories
+include_directories(${Qt5Core_INCLUDE_DIRS}
+                  ${Qt5Quick_INCLUDE_DIRS}
+                  ${Qt5Gui_INCLUDE_DIRS})
 
 # Add executable
 add_executable(KidsPlayer
