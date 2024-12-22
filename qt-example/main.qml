@@ -672,7 +672,7 @@ Window {
     function getArtistImage(artistUri) {
         if (artistUri) {
             try {
-                sendRequest("core.library.getImages", { uris: [artistUri] }, "getArtistImage_" + artistUri)
+                sendRequest("core.library.get_images", { uris: [artistUri] }, "getArtistImage_" + artistUri)
             } catch (error) {
                 console.log("Error getting artist image:", error)
             }
@@ -682,7 +682,7 @@ Window {
     function getAlbumImage(albumUri) {
         if (albumUri) {
             try {
-                sendRequest("core.library.getImages", { uris: [albumUri] }, "getAlbumImage_" + albumUri)
+                sendRequest("core.library.get_images", { uris: [albumUri] }, "getAlbumImage_" + albumUri)
             } catch (error) {
                 console.log("Error getting album image:", error)
             }
