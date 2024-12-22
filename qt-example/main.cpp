@@ -66,8 +66,7 @@ int main(int argc, char *argv[])
     // Load emoji fonts
     QFontDatabase::addApplicationFont("/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
     
-    // Configure graphics backend
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLES);
+    // Use software rendering for better compatibility
     QQuickWindow::setSceneGraphBackend(QSGRendererInterface::Software);
     
     qDebug() << "Available platforms:" << QGuiApplication::platformName();
