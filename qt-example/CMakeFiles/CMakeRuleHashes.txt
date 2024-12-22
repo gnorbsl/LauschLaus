@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+4968425e892d7ed422dc6e43178c3319 CMakeFiles/KidsPlayer_autogen
+97b8b172be3da0ec00ce87d6e0173614 KidsPlayer_autogen/timestamp
