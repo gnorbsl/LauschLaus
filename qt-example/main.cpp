@@ -9,16 +9,20 @@
 
 int main(int argc, char *argv[])
 {
+    // Set attributes before creating the application
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
     // Performance optimizations
     qputenv("QT_QUICK_CONTROLS_STYLE", "Basic");  // Use basic style for better performance
     qputenv("QML_DISABLE_DISK_CACHE", "0");       // Enable QML disk cache
     qputenv("QSG_RENDER_LOOP", "basic");          // Use basic render loop for embedded systems
     
-    // Additional embedded system optimizations
-    qputenv("QT_QPA_EGLFS_FORCE888", "1");       // Force 32-bit color mode
-    qputenv("QT_QPA_EGLFS_DEPTH", "24");         // Set color depth
-    qputenv("QT_QPA_EGLFS_HIDECURSOR", "1");     // Hide cursor on embedded systems
-    qputenv("QMLSCENE_DEVICE", "softwarecontext"); // Use software rendering if hardware fails
+    // Set up X11/XCB environment
+    qputenv("QT_QPA_PLATFORM", "xcb");
+    qputenv("QT_QPA_EGLFS_ALWAYS_SET_MODE", "1");
+    qputenv("QT_FONT_DPI", "96");
+    qputenv("XDG_RUNTIME_DIR", "/tmp/runtime-pi");
     
     // Allow file reading for XMLHttpRequest
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
@@ -30,27 +34,7 @@ int main(int argc, char *argv[])
     qputenv("QT_DEBUG_PLUGINS", "1");
     qputenv("QT_LOGGING_RULES", "qt.qpa.*=true");  // Enable all QPA logging for debugging
     
-#ifdef Q_OS_MACOS
-    qputenv("QT_QPA_PLATFORM", "cocoa");
-#else
-    // For Raspberry Pi, use linuxfb by default
-    qputenv("QT_QPA_PLATFORM", "linuxfb");
-    
-    // Set the framebuffer device
-    qputenv("QT_QPA_FB_DRM", "1");
-    qputenv("QT_QPA_FB_HIDECURSOR", "1");
-    qputenv("QT_QPA_FB_TSLIB", "1");
-    
     QGuiApplication app(argc, argv);
-    
-    if (app.platformName() != "linuxfb") {
-        qDebug() << "Failed to use linuxfb, trying minimal platform";
-        qputenv("QT_QPA_PLATFORM", "minimal");
-    }
-#endif
-    
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     
     // Set QML import path to current working directory
     QString currentPath = QDir::currentPath();
