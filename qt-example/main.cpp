@@ -33,30 +33,24 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_MACOS
     qputenv("QT_QPA_PLATFORM", "cocoa");
 #else
-    // For embedded Linux systems like Raspberry Pi, try EGLFS first
-    // If EGLFS fails, fall back to LinuxFB, then to minimal
-    const char* platforms[] = {"eglfs", "linuxfb", "minimal"};
-    bool platformSet = false;
+    // For Raspberry Pi, use linuxfb by default
+    qputenv("QT_QPA_PLATFORM", "linuxfb");
     
-    for (const char* platform : platforms) {
-        qputenv("QT_QPA_PLATFORM", platform);
-        QGuiApplication testApp(argc, argv);
-        if (testApp.platformName() == platform) {
-            platformSet = true;
-            break;
-        }
-    }
+    // Set the framebuffer device
+    qputenv("QT_QPA_FB_DRM", "1");
+    qputenv("QT_QPA_FB_HIDECURSOR", "1");
+    qputenv("QT_QPA_FB_TSLIB", "1");
     
-    if (!platformSet) {
-        qDebug() << "Failed to set any platform, defaulting to minimal";
+    QGuiApplication app(argc, argv);
+    
+    if (app.platformName() != "linuxfb") {
+        qDebug() << "Failed to use linuxfb, trying minimal platform";
         qputenv("QT_QPA_PLATFORM", "minimal");
     }
 #endif
     
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    
-    QGuiApplication app(argc, argv);
     
     // Set QML import path to current working directory
     QString currentPath = QDir::currentPath();
