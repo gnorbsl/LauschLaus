@@ -4,10 +4,11 @@
 sudo rm -f /tmp/.X0-lock
 
 # Set environment variables for Qt
-export QT_QPA_PLATFORM=eglfs
-export QT_QPA_EGLFS_ALWAYS_SET_MODE=1
-export QT_QPA_EGLFS_KMS_ATOMIC=1
-export QT_QPA_EGLFS_FORCE888=1
+export QT_QPA_PLATFORM=linuxfb
+export QT_QPA_FB_DRM=1
+export QT_QPA_FB_HIDECURSOR=1
+export QT_QPA_FB_TSLIB=1
+export QT_QPA_GENERIC_PLUGINS=evdevtouch:/dev/input/event0
 export QT_FONT_DPI=96
 export XDG_RUNTIME_DIR=/tmp/runtime-pi
 
@@ -15,5 +16,10 @@ export XDG_RUNTIME_DIR=/tmp/runtime-pi
 mkdir -p /tmp/runtime-pi
 chmod 700 /tmp/runtime-pi
 
-# Run the application with access to the graphics device
+# Make sure we have access to the framebuffer device
+if [ -e /dev/fb0 ]; then
+    sudo chmod 666 /dev/fb0
+fi
+
+# Run the application
 sudo -E ./KidsPlayer

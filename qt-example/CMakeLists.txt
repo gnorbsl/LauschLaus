@@ -4,9 +4,18 @@ project(KidsPlayer VERSION 1.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 # Find Qt5 packages
-find_package(Qt5 COMPONENTS Core Quick REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Gui REQUIRED)
+
+# Add platform-specific configuration
+if(UNIX AND NOT APPLE)
+    # Linux/Raspberry Pi specific settings
+    add_definitions(-DQT_QPA_PLATFORM=linuxfb)
+    add_definitions(-DUSE_LINUX_FB)
+endif()
 
 # Add executable
 add_executable(KidsPlayer
@@ -17,4 +26,5 @@ add_executable(KidsPlayer
 target_link_libraries(KidsPlayer
     Qt5::Core
     Qt5::Quick
+    Qt5::Gui
 ) 
