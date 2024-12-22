@@ -18,12 +18,6 @@ int main(int argc, char *argv[])
     qputenv("QML_DISABLE_DISK_CACHE", "0");       // Enable QML disk cache
     qputenv("QSG_RENDER_LOOP", "basic");          // Use basic render loop for embedded systems
     
-    // Set up X11/XCB environment
-    qputenv("QT_QPA_PLATFORM", "xcb");
-    qputenv("QT_QPA_EGLFS_ALWAYS_SET_MODE", "1");
-    qputenv("QT_FONT_DPI", "96");
-    qputenv("XDG_RUNTIME_DIR", "/tmp/runtime-pi");
-    
     // Allow file reading for XMLHttpRequest
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
     
