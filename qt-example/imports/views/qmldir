@@ -1,0 +1,4 @@
+module views
+ArtistsView 1.0 ArtistsView.qml
+AlbumsView 1.0 AlbumsView.qml
+PlayerView 1.0 PlayerView.qml 

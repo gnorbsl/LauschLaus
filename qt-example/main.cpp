@@ -14,6 +14,12 @@ int main(int argc, char *argv[])
     qputenv("QML_DISABLE_DISK_CACHE", "0");       // Enable QML disk cache
     qputenv("QSG_RENDER_LOOP", "basic");          // Use basic render loop for embedded systems
     
+    // Additional embedded system optimizations
+    qputenv("QT_QPA_EGLFS_FORCE888", "1");       // Force 32-bit color mode
+    qputenv("QT_QPA_EGLFS_DEPTH", "24");         // Set color depth
+    qputenv("QT_QPA_EGLFS_HIDECURSOR", "1");     // Hide cursor on embedded systems
+    qputenv("QMLSCENE_DEVICE", "softwarecontext"); // Use software rendering if hardware fails
+    
     // Allow file reading for XMLHttpRequest
     qputenv("QML_XHR_ALLOW_FILE_READ", "1");
     
@@ -22,14 +28,29 @@ int main(int argc, char *argv[])
     
     // Enable debug output
     qputenv("QT_DEBUG_PLUGINS", "1");
-    qputenv("QT_LOGGING_RULES", "qt.qpa.input.*=false;qt.qpa.events=false;qt.qpa.backingstore=false;qt.qpa.window=false;qt.qpa.screen.*=false;qt.qpa.drawing=false");
+    qputenv("QT_LOGGING_RULES", "qt.qpa.*=true");  // Enable all QPA logging for debugging
     
 #ifdef Q_OS_MACOS
     qputenv("QT_QPA_PLATFORM", "cocoa");
 #else
-    // Use XCB (X11) platform for Linux
-    qputenv("QT_QPA_PLATFORM", "xcb");
-    qputenv("DISPLAY", ":0");
+    // For embedded Linux systems like Raspberry Pi, try EGLFS first
+    // If EGLFS fails, fall back to LinuxFB, then to minimal
+    const char* platforms[] = {"eglfs", "linuxfb", "minimal"};
+    bool platformSet = false;
+    
+    for (const char* platform : platforms) {
+        qputenv("QT_QPA_PLATFORM", platform);
+        QGuiApplication testApp(argc, argv);
+        if (testApp.platformName() == platform) {
+            platformSet = true;
+            break;
+        }
+    }
+    
+    if (!platformSet) {
+        qDebug() << "Failed to set any platform, defaulting to minimal";
+        qputenv("QT_QPA_PLATFORM", "minimal");
+    }
 #endif
     
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -45,7 +66,8 @@ int main(int argc, char *argv[])
     // Load emoji fonts
     QFontDatabase::addApplicationFont("/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
     
-    // Enable shader disk cache
+    // Configure graphics backend
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLES);
     QQuickWindow::setSceneGraphBackend(QSGRendererInterface::Software);
     
     qDebug() << "Available platforms:" << QGuiApplication::platformName();

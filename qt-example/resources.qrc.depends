@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>imports/utils/qmldir</file>
+        <file>imports/utils/MopidyController.qml</file>
+        <file>imports/utils/ConfigLoader.qml</file>
+        <file>imports/utils/SpotifyController.qml</file>
+        <file>imports/components/qmldir</file>
+        <file>imports/components/BackButton.qml</file>
+        <file>imports/components/NavigationBar.qml</file>
+        <file>imports/components/TitleBar.qml</file>
+        <file>imports/views/qmldir</file>
+        <file>imports/views/ArtistsView.qml</file>
+        <file>imports/views/AlbumsView.qml</file>
+        <file>imports/views/PlayerView.qml</file>
+    </qresource>
+</RCC> 

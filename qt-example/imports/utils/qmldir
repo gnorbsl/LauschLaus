@@ -1,0 +1,4 @@
+module utils
+MopidyController 1.0 MopidyController.qml
+SpotifyController 1.0 SpotifyController.qml
+ConfigLoader 1.0 ConfigLoader.qml 

@@ -1,0 +1,4 @@
+module components
+BackButton 1.0 BackButton.qml
+TitleBar 1.0 TitleBar.qml
+NavigationBar 1.0 NavigationBar.qml 
