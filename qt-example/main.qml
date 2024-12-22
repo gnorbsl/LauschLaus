@@ -5,9 +5,9 @@ import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.15
 import QtWebSockets 1.1
 
-import "utils"
-import "components"
-import "views"
+import "imports/utils" as Utils
+import "imports/components" as Components
+import "imports/views" as Views
 
 Window {
     id: root
@@ -22,16 +22,46 @@ Window {
     property string currentView: "artists"
     property string selectedArtist: ""
     
-    // Mopidy controller
-    MopidyController {
+    // Controllers
+    Utils.ConfigLoader {
+        id: configLoader
+        
+        onLoaded: {
+            // Initialize Spotify
+            var clientId = getValue("spotify.clientId", "")
+            var clientSecret = getValue("spotify.clientSecret", "")
+            
+            if (clientId && clientSecret) {
+                console.log("Initializing Spotify with credentials from config")
+                spotifyController.initialize(clientId, clientSecret)
+            } else {
+                console.error("Spotify credentials not found in config")
+            }
+            
+            // Initialize WebSocket connection
+            socket.url = getValue("mopidy.url", "ws://localhost:6680/mopidy/ws")
+            socket.active = true
+        }
+        
+        onError: function(message) {
+            console.error("Config error:", message)
+        }
+        
+        Component.onCompleted: load()
+    }
+    
+    Utils.MopidyController {
         id: mopidyController
+    }
+    
+    Utils.SpotifyController {
+        id: spotifyController
     }
     
     // WebSocket for Mopidy connection
     WebSocket {
         id: socket
-        url: "ws://localhost:6680/mopidy/ws"
-        active: true
+        active: false
         
         onTextMessageReceived: {
             mopidyController.handleMessage(message)
@@ -56,11 +86,25 @@ Window {
             GradientStop { position: 1.0; color: "#FFCC70" }
         }
 
+        // Navigation bar
+        Components.NavigationBar {
+            id: navigationBar
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: 10
+            }
+            z: 1
+            currentView: root.currentView
+            onViewChanged: (view) => root.currentView = view
+        }
+
         // Back button
-        BackButton {
+        Components.BackButton {
             id: backButton
             x: 10
-            y: 10
+            y: navigationBar.height + 20
             z: 1
             visible: currentView === "albums" || currentView === "player"
             onClicked: {
@@ -74,33 +118,39 @@ Window {
         }
 
         // Title bar
-        TitleBar {
+        Components.TitleBar {
             id: titleBar
             anchors {
-                top: parent.top
+                top: navigationBar.bottom
                 left: backButton.right
                 right: parent.right
                 margins: 10
             }
             visible: currentView === "albums" || currentView === "player"
             z: 1
-            title: currentView === "player" ? mopidyController.currentAlbum : selectedArtist
+            title: currentView === "player" ? mopidyController.currentTrack : selectedArtist
         }
 
         // Main content area
         Rectangle {
             id: mainContent
-            anchors.fill: parent
-            anchors.margins: 10
+            anchors {
+                top: titleBar.visible ? titleBar.bottom : navigationBar.bottom
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                margins: 10
+            }
             color: Qt.rgba(1, 1, 1, 0.1)
             radius: 12
 
             // Artists View
-            ArtistsView {
+            Views.ArtistsView {
                 id: artistsView
                 anchors.fill: parent
                 visible: currentView === "artists"
                 mopidyController: mopidyController
+                spotifyController: spotifyController
                 onArtistSelected: (name, uri) => {
                     selectedArtist = name
                     mopidyController.getAlbums(uri)
@@ -109,12 +159,13 @@ Window {
             }
 
             // Albums View
-            AlbumsView {
+            Views.AlbumsView {
                 id: albumsView
                 anchors.fill: parent
-                anchors.topMargin: 70
                 visible: currentView === "albums"
                 mopidyController: mopidyController
+                spotifyController: spotifyController
+                selectedArtist: root.selectedArtist
                 onAlbumSelected: (name, uri) => {
                     mopidyController.playAlbum(uri)
                     currentView = "player"
@@ -122,7 +173,7 @@ Window {
             }
 
             // Player View
-            PlayerView {
+            Views.PlayerView {
                 id: playerView
                 anchors.fill: parent
                 visible: currentView === "player"
