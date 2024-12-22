@@ -1,5 +1,0 @@
-/Users/patrichoffmann/WebstormProjects/LauschLaus/qt-example/CMakeFiles/KidsPlayer.dir
-/Users/patrichoffmann/WebstormProjects/LauschLaus/qt-example/CMakeFiles/edit_cache.dir
-/Users/patrichoffmann/WebstormProjects/LauschLaus/qt-example/CMakeFiles/rebuild_cache.dir
-/Users/patrichoffmann/WebstormProjects/LauschLaus/qt-example/CMakeFiles/KidsPlayer_autogen_timestamp_deps.dir
-/Users/patrichoffmann/WebstormProjects/LauschLaus/qt-example/CMakeFiles/KidsPlayer_autogen.dir
