@@ -10,6 +10,13 @@ set(CMAKE_AUTOUIC ON)
 # Find Qt5 packages
 find_package(Qt5 COMPONENTS Core Quick Gui REQUIRED)
 
+# Add platform-specific configuration
+if(UNIX AND NOT APPLE)
+    add_definitions(-DQT_QPA_PLATFORM=linuxfb)
+    add_definitions(-DQT_QPA_FB_NO_LIBINPUT=1)
+    add_definitions(-DQT_QPA_GENERIC_PLUGINS="evdevtouch:/dev/input/event0")
+endif()
+
 # Include Qt directories
 include_directories(${Qt5Core_INCLUDE_DIRS}
                   ${Qt5Quick_INCLUDE_DIRS}
